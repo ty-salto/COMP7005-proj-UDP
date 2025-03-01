@@ -7,7 +7,6 @@ class Server:
         self.server_port = server_port
         self.server_socket = None
 
-        self.server_init()
 
     def server_init(self):
         print("Server Initialize...")
@@ -20,21 +19,20 @@ class Server:
         self.server_socket.bind((self.server_ip, self.server_port))
     
     def server_listen(self):
-        while True:
-            print("Waiting..")
-            data, client_addr = self.server_socket.recvfrom(1024)
-            self.server_receive()
+
+        print("Waiting..")
+        return self.server_socket.recvfrom(1024) # return tuple [data, client_addr]
+        
 
     def server_receive(self, data, client_addr):
 
         print("Server Receiving...")
         print(f"Received ({client_addr}): {data.decode()}")
+        return client_addr
 
-        self.server_response(client_addr)
-
-    def server_response(self, client_addr):
+    def server_response(self, ip, port):
         print("Server Resonding...")
-        self.server_socket.sendto("received!".encode(), client_addr)
+        self.server_socket.sendto("received!".encode(), (ip,port))
 
 
         

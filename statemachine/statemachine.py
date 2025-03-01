@@ -31,20 +31,21 @@ class StateMachine:
         except AttributeError:
             print(f"Warning: '{value}' is not a valid method in {self.class_ref.__name__}. Skipping...")
 
-        #print(self.state_actions)
+        # Remove once done debugging
+        print(self.state_actions)
 
     def __generate_state_transition(self, filepath):
         with open(filepath) as f:
             state_action = json.load(f)
         try:
             for key, value in state_action.items():
-                self.state_transition[State[key]] = []
-                for state in value:
-                    self.state_transition[State[key]].append(State[state]) 
+                self.state_transition[State[key]] = [State[state] for state in value]
+                # for state in value:
+                #     self.state_transition[State[key]].append(State[state]) 
         except KeyError:
             print(f"Warning: '{key}' is not a valid state in the State enum. Skipping...")
         except AttributeError:
             print(f"Warning: '{value}' is not a valid method in {self.class_ref.__name__}. Skipping...")
-
+        
+        # Remove once done debugging
         print(self.state_transition)
-        pass

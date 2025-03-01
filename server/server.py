@@ -11,7 +11,7 @@ class Server:
 
     def server_init(self):
         print("Server Initialize...")
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,0)
 
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         
@@ -22,10 +22,10 @@ class Server:
     def server_listen(self):
         while True:
             print("Waiting..")
+            data, client_addr = self.server_socket.recvfrom(1024)
             self.server_receive()
 
-    def server_receive(self):
-        data, client_addr = self.server_socket.recvfrom(1024)
+    def server_receive(self, data, client_addr):
 
         print("Server Receiving...")
         print(f"Received ({client_addr}): {data.decode()}")

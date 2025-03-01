@@ -1,0 +1,6 @@
+{
+    "INIT": "server_init",
+    "LISTEN": "server_listen",
+    "RECEIVE": "server_receive",
+    "RESPONSE": "server_response"
+}

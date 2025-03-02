@@ -17,6 +17,15 @@ def is_valid_address_port(addrport, is_port):
             return False
     return True
 
+def valid_fixed_or_range_number(number):
+    if not number:
+        raise ValueError("Value must be not be empty")
+        return False
+    if not number.isdigit():
+        raise ValueError("Invalid Number: Must be a number")
+        return False
+    return True
+
 def validate_key(key):
     if not key:
         raise ValueError("Missing Key: usage -k <key>")

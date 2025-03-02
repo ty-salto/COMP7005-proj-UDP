@@ -13,12 +13,12 @@ class Proxy:
         # Edit later
         self.target_ip = "127.0.0.1"
         self.target_port = 8081
-        self.client_drop = .1;
-        self.server_drop = .1;
-        self.client_delay = .9;
-        self.server_delay = .9;
-        self.server_delay_time = "1-3";
-        self.client_delay_time = "3";
+        self.client_drop = .1
+        self.server_drop = .1
+        self.client_delay = .9
+        self.server_delay = .9
+        self.server_delay_time = "1-3"
+        self.client_delay_time = "3"
         self.proxy_socket = socket.socket()
 
     def proxy_init(self):

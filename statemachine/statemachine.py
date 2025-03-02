@@ -24,7 +24,7 @@ class StateMachine:
     def __generate_state_action(self, filepath):
         with open(filepath) as f:
             state_action = json.load(f)
-        
+
         try:
             for key, value in state_action.items():
                 self.state_actions[State[key]] = getattr(self.class_ref, value)
@@ -43,12 +43,12 @@ class StateMachine:
             for key, value in state_action.items():
                 self.state_transition[State[key]] = [State[state] for state in value]
                 # for state in value:
-                #     self.state_transition[State[key]].append(State[state]) 
+                #     self.state_transition[State[key]].append(State[state])
         except KeyError:
             print(f"Warning: '{key}' is not a valid state in the State enum. Skipping...")
         except AttributeError:
             print(f"Warning: '{value}' is not a valid method in {self.class_ref.__name__}. Skipping...")
-        
+
         # Remove once done debugging
         print(self.state_transition)
 
@@ -60,7 +60,7 @@ class StateMachine:
             if action:
                 signature = inspect.signature(action)
                 param_count = len(signature.parameters)
-            
+
                 if param_count == 0:
                     result = action()
                 else:
@@ -76,9 +76,5 @@ class StateMachine:
                 if next_states:
                     self.current_state = next_states[0]
                     args = next_args
-                else: 
+                else:
                     isRun = False
-            
-
-
-

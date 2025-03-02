@@ -2,6 +2,7 @@ import socket
 import time
 import random
 
+
 class Proxy:
     def __init__(self, proxy_ip: str, proxy_port: int):
         self.listen_ip= proxy_ip
@@ -41,10 +42,11 @@ class Proxy:
             self.client_ip, self.client_port = addr[0], addr[1]
 
         message = data.decode()
-        print(f"Recieved({addr}): {message}")
+        print(f"Recieved{addr}: {message}")
         return addr, message
 
-    def proxy_response(self, ip, port, message):
+    def proxy_response(self, address, message):
+        ip, port = address
         encoded_message = message.encode()
         if self.is_server(ip, port):
             self.to_client(encoded_message)
@@ -57,7 +59,7 @@ class Proxy:
             print("Server Packet to Client Fails")
             return
         if self.does_packet_delay(self.server_delay):
-            print(f"Server Packet is delayed by {self.server_delay_time} seconds")
+            # print(f"Server Packet is delayed by {self.server_delay_time} seconds")
             self.delay_by_seconds(self.server_delay_time);
         self.proxy_socket.sendto(message,(self.client_ip, self.client_port) )
 

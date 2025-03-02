@@ -1,0 +1,6 @@
+{
+  "INIT": "proxy_init",
+  "LISTEN": "proxy_listen",
+  "RECEIVE": "proxy_receive",
+  "SEND": "proxy_response"
+}

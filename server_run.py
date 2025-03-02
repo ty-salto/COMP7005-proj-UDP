@@ -1,5 +1,5 @@
 from utils.args_parser import ArgsParser
-from server.server import Server 
+from server.server import Server
 from statemachine.statemachine import StateMachine
 
 

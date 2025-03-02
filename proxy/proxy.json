@@ -1,0 +1,12 @@
+{
+  "ip": {
+    "arg": "--ip",
+    "help": "Proxy IP Address",
+    "type": "str"
+  },
+  "port": {
+    "arg": "--port",
+    "help": "Proxy Port Number",
+    "type": "int"
+  }
+}

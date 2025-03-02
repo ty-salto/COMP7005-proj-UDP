@@ -1,0 +1,6 @@
+{
+    "INIT": "client_init",
+    "PROCESS" : "client_message",
+    "SEND": "client_send",
+    "RECEIVE": "client_receive"
+}

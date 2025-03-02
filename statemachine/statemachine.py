@@ -69,7 +69,7 @@ class StateMachine:
                 if isinstance(result, tuple):
                     next_args = result  # Unpack tuple as arguments for next state
                 else:
-                    next_args = (result)
+                    next_args = (result,) if result is not None else ()
 
             if self.current_state in self.state_transition:
                 next_states = self.state_transition[self.current_state]

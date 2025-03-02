@@ -1,0 +1,6 @@
+{
+    "INIT": ["PROCESS"],
+    "PROCESS" : ["SEND"],
+    "SEND": ["RECEIVE"],
+    "RECEIVE": ["PROCESS"]
+}

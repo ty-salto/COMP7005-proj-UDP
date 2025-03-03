@@ -2,5 +2,6 @@
     "INIT": "client_init",
     "PROCESS" : "client_message",
     "SEND": "client_send",
-    "RECEIVE": "client_receive"
+    "RECEIVE": "client_receive",
+    "CLOSING" : "client_closing"
 }

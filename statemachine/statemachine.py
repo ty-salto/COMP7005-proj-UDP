@@ -2,20 +2,15 @@ import enum
 import json
 import inspect
 
-class State(enum.Enum):
-    INIT = 0
-    LISTEN = 1
-    RECEIVE = 2
-    PROCESS = 3
-    SEND = 4
-    CLOSING = 5
+
 
 class StateMachine:
-    def __init__(self, class_ref, state_action_file, state_transition_file):
+    def __init__(self, class_state, class_ref, state_action_file, state_transition_file):
         self.class_ref = class_ref
         self.state_actions = {}
         self.state_transition = {}
-        self.current_state = State.INIT
+        self.class_state = class_state
+        self.current_state = class_state.INIT
 
         self.__generate_state_action(state_action_file)
         self.__generate_state_transition(state_transition_file)
@@ -27,7 +22,7 @@ class StateMachine:
 
         try:
             for key, value in state_action.items():
-                self.state_actions[State[key]] = getattr(self.class_ref, value)
+                self.state_actions[self.class_state[key]] = getattr(self.class_ref, value)
         except KeyError:
             print(f"Warning: '{key}' is not a valid state in the State enum. Skipping...")
         except AttributeError:
@@ -41,7 +36,7 @@ class StateMachine:
             state_action = json.load(f)
         try:
             for key, value in state_action.items():
-                self.state_transition[State[key]] = [State[state] for state in value]
+                self.state_transition[self.class_state[key]] = [self.class_state[state] for state in value]
                 # for state in value:
                 #     self.state_transition[State[key]].append(State[state])
         except KeyError:
@@ -67,14 +62,16 @@ class StateMachine:
                     result = action(*args)
 
                 if isinstance(result, tuple):
-                    next_args = result  # Unpack tuple as arguments for next state
+                    state_decision, *next_args = result  # Unpack tuple as arguments for next state
                 else:
-                    next_args = (result,) if result is not None else ()
+                    state_decision = result
+                    next_args = ()
+
 
             if self.current_state in self.state_transition:
                 next_states = self.state_transition[self.current_state]
-                if next_states:
-                    self.current_state = next_states[0]
+                if state_decision in next_states:
+                    self.current_state = state_decision
                     args = next_args
                 else:
                     isRun = False

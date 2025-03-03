@@ -1,4 +1,5 @@
 import socket
+from .server_states import ServerState
 
 class Server:
     def __init__(self, server_ip, server_port):
@@ -17,22 +18,28 @@ class Server:
         
         print("Server Binding...")
         self.server_socket.bind((self.server_ip, self.server_port))
+
+        return ServerState.LISTEN
+
     
     def server_listen(self):
 
         print("Waiting..")
-        return self.server_socket.recvfrom(1024) # return tuple [data, client_addr]
+        data, client_addr = self.server_socket.recvfrom(1024) 
+        return ServerState.RECEIVE, data, client_addr # return tuple [data, client_addr]
         
 
     def server_receive(self, data, client_addr):
 
         print("Server Receiving...")
         print(f"Received ({client_addr}): {data.decode()}")
-        return client_addr
+        ip, port = client_addr
+        return ServerState.SEND, ip, port
 
     def server_response(self, ip, port):
         print("Server Resonding...")
-        self.server_socket.sendto("received!".encode(), (ip,port))
+        self.server_socket.sendto("received!\n".encode(), (ip,port))
+        return ServerState.LISTEN
 
 
         

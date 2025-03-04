@@ -19,10 +19,11 @@ class ArgsParser:
         for section, values in config.items():
             arg_name = values.get("arg")
             arg_type = self.TYPE_MAP.get(values.get("type"), str)
+            arg_is_required = values.get("required") == "true"
             arg_help = values.get("help", "")
 
             if arg_name:
-                self.parser.add_argument(arg_name, type=arg_type, help=arg_help)
+                self.parser.add_argument(arg_name, type=arg_type, help=arg_help, required=arg_is_required)
 
 
 

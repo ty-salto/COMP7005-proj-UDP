@@ -1,6 +1,7 @@
 from statemachine.statemachine import StateMachine
 from utils.args_parser import ArgsParser
 from proxy.proxy import Proxy
+from proxy.proxy_states import ProxyState
 
 if __name__ == "__main__":
     """
@@ -17,5 +18,5 @@ if __name__ == "__main__":
     args = parse_args.get_args()
     proxy = Proxy(args.ip, args.port)
 
-    sm = StateMachine(proxy, "./proxy/proxy_state_actions.json", "./proxy/proxy_state_transition.json")
+    sm = StateMachine(ProxyState, proxy, "./proxy/proxy_state_actions.json", "./proxy/proxy_state_transition.json")
     sm.run()

@@ -1,6 +1,7 @@
 {
     "INIT": ["PROCESS"],
-    "PROCESS" : ["SEND"],
+    "PROCESS" : ["SEND", "CLOSING"],
     "SEND": ["RECEIVE"],
-    "RECEIVE": ["PROCESS"]
+    "RECEIVE": ["PROCESS"],
+    "CLOSING" : []
 }

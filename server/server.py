@@ -1,8 +1,9 @@
 import socket
 
 class Server:
-    def __init__(self, server_ip, server_port):
+    FIRST_INDEX = 0
 
+    def __init__(self, server_ip, server_port):
         self.server_ip = server_ip
         self.server_port = server_port
         self.server_socket = None
@@ -17,22 +18,28 @@ class Server:
         
         print("Server Binding...")
         self.server_socket.bind((self.server_ip, self.server_port))
+
+        return self.FIRST_INDEX
+
     
     def server_listen(self):
 
         print("Waiting..")
-        return self.server_socket.recvfrom(1024) # return tuple [data, client_addr]
+        data, client_addr = self.server_socket.recvfrom(1024) 
+        return self.FIRST_INDEX, data, client_addr # return tuple [data, client_addr]
         
 
     def server_receive(self, data, client_addr):
 
         print("Server Receiving...")
         print(f"Received ({client_addr}): {data.decode()}")
-        return client_addr
+        ip, port = client_addr
+        return self.FIRST_INDEX, ip, port
 
     def server_response(self, ip, port):
         print("Server Resonding...")
-        self.server_socket.sendto("received!".encode(), (ip,port))
+        self.server_socket.sendto("received!\n".encode(), (ip,port))
+        return self.FIRST_INDEX
 
 
         

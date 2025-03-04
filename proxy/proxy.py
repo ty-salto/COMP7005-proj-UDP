@@ -11,11 +11,12 @@ class Proxy:
     Proxy class for UDP proxy server
     """
     HUNDRED = 100
+    FIRST_INDEX = 0
     def __init__(self, proxy_ip: str, proxy_port: int):
         self.listen_ip= proxy_ip
         self.listen_port = proxy_port
         self.client_ip = None
-        self.cient_port = None
+        self.client_port = None
         # Edit later
         self.target_ip = "127.0.0.1"
         self.target_port = 8081
@@ -25,7 +26,7 @@ class Proxy:
         self.server_delay = 90 / self.HUNDRED
         self.server_delay_time = "1-3"
         self.client_delay_time = "2"
-        self.proxy_socket = socket.socket()
+        self.proxy_socket = socket.socket
         self.running = True
         self.start_monitoring()
 
@@ -42,8 +43,7 @@ class Proxy:
         print(f"Proxy Ready - server is listening on {self.listen_ip}:{self.listen_port}")
         self.proxy_socket.bind((self.listen_ip, self.listen_port))
         display.options()
-
-
+        return self.FIRST_INDEX
 
     def proxy_listen(self) -> tuple:
         """
@@ -52,7 +52,10 @@ class Proxy:
         @return: data and address of client/server
         """
         print("Waiting for Packets")
-        return self.proxy_socket.recvfrom(1024)
+        print("CMD (e.g., 'client_drop 0.2', 1) options, 2) current_setup, or 3/q quit): ".rstrip())
+        packet = self.proxy_socket.recvfrom(1024)
+        ip, port = packet[0], packet[1]
+        return self.FIRST_INDEX, ip, port
 
     def proxy_receive(self, data: bytes, addr: tuple) -> tuple:
         """
@@ -68,8 +71,8 @@ class Proxy:
             self.client_ip, self.client_port = addr[0], addr[1]
 
         message = data.decode()
-        print(f"Recieved{addr}: {message}")
-        return addr, message
+        print(f"Recieved: {addr}: {message}")
+        return self.FIRST_INDEX, addr, message
 
     def proxy_response(self, address: tuple, message: str):
         """
@@ -84,6 +87,7 @@ class Proxy:
             self.to_client(encoded_message)
         else:
             self.to_server(encoded_message)
+        return self.FIRST_INDEX
 
     def to_client(self, message: bytes):
         """
@@ -99,6 +103,7 @@ class Proxy:
             # print(f"Server Packet is delayed by {self.server_delay_time} seconds")
             self.delay_by_seconds(self.server_delay_time);
         self.proxy_socket.sendto(message,(self.client_ip, self.client_port) )
+
 
     def to_server(self, message: bytes):
         """

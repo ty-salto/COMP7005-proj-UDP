@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parse_args = ArgsParser("Proxy", "./proxy/proxy.json")
     args = parse_args.get_args()
     proxy = Proxy(args.ip, args.port)
+    # proxy = Proxy("127.0.0.1", 4001)
 
     sm = StateMachine(ProxyState, proxy, "./proxy/proxy_state_actions.json", "./proxy/proxy_state_transition.json")
     sm.run()

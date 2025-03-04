@@ -6,7 +6,7 @@ from statemachine.statemachine import StateMachine
 
 
 if __name__ == '__main__':
-    parse_args = ArgsParser("Server", "./client/client.json")
+    parse_args = ArgsParser("Client", "./client/client.json")
     args = parse_args.get_args()
 
     print(args)

@@ -62,16 +62,44 @@ class StateMachine:
                     result = action(*args)
 
                 if isinstance(result, tuple):
-                    state_decision, *next_args = result  # Unpack tuple as arguments for next state
+                    next_state_index, *next_args = result  # Unpack tuple as arguments for next state
                 else:
-                    state_decision = result
+                    next_state_index = result
                     next_args = ()
 
 
             if self.current_state in self.state_transition:
                 next_states = self.state_transition[self.current_state]
-                if state_decision in next_states:
-                    self.current_state = state_decision
+
+                if next_states:
+                    self.current_state = next_states[next_state_index]
                     args = next_args
                 else:
                     isRun = False
+
+
+    # def run(self,*args):
+    #     isRun = True
+    #     while isRun:
+    #         action = self.state_actions[self.current_state]
+
+    #         if action:
+    #             signature = inspect.signature(action)
+    #             param_count = len(signature.parameters)
+
+    #             if param_count == 0:
+    #                 result = action()
+    #             else:
+    #                 result = action(*args)
+
+    #             if isinstance(result, tuple):
+    #                 next_args = result  # Unpack tuple as arguments for next state
+    #             else:
+    #                 next_args = (result,) if result is not None else ()
+
+    #         if self.current_state in self.state_transition:
+    #             next_states = self.state_transition[self.current_state]
+    #             if next_states:
+    #                 self.current_state = next_states[0]
+    #                 args = next_args
+    #             else:

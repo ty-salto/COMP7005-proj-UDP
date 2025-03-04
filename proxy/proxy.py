@@ -45,7 +45,6 @@ class Proxy:
 
 
 
-
     def proxy_listen(self) -> tuple:
         """
         Listens for packets from client/server

@@ -2,11 +2,13 @@
   "ip": {
     "arg": "--ip",
     "help": "Proxy IP Address",
-    "type": "str"
+    "type": "str",
+    "required": "true"
   },
   "port": {
     "arg": "--port",
     "help": "Proxy Port Number",
-    "type": "int"
+    "type": "int",
+    "required": "true"
   }
 }

@@ -8,7 +8,7 @@ if __name__ == '__main__':
     parse_args = ArgsParser("Server", "./server/server.json")
     args = parse_args.get_args()
 
-    server = Server(args.ip, args.port)
+    server = Server(args.listen_ip, args.listen_port)
 
     # server.server_listen()
 

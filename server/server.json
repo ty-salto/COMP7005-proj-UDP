@@ -1,12 +1,14 @@
 {
     "ip": {
-        "arg": "--ip",
+        "arg": "--listen-ip",
         "help": "Host IP Address",
-        "type": "str"
+        "type": "str",
+        "required": "true"
     },
     "port": {
-        "arg": "--port",
+        "arg": "--listen-port",
         "help": "Host Port Number",
-        "type": "int"
+        "type": "int",
+        "required": "true"
     }
 }

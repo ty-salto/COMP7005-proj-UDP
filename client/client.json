@@ -2,11 +2,13 @@
     "ip": {
         "arg": "--target-ip",
         "help": "Target IP Address",
-        "type": "str"
+        "type": "str",
+        "required": "true"
     },
     "port": {
         "arg": "--target-port",
         "help": "Target Port Number",
-        "type": "int"
+        "type": "int",
+        "required": "true"
     }
 }

@@ -11,7 +11,7 @@ class Proxy:
     Proxy class for UDP proxy server
     """
     HUNDRED = 100
-    FIRST_INDEX = 0
+
     def __init__(self, proxy_ip: str, proxy_port: int):
         self.listen_ip= proxy_ip
         self.listen_port = proxy_port
@@ -26,7 +26,7 @@ class Proxy:
         self.server_delay = 90 / self.HUNDRED
         self.server_delay_time = "1-3"
         self.client_delay_time = "2"
-        self.proxy_socket = socket.socket
+        self.proxy_socket = socket.socket()
         self.running = True
         self.start_monitoring()
 
@@ -43,7 +43,7 @@ class Proxy:
         print(f"Proxy Ready - server is listening on {self.listen_ip}:{self.listen_port}")
         self.proxy_socket.bind((self.listen_ip, self.listen_port))
         display.options()
-        return self.FIRST_INDEX
+
 
     def proxy_listen(self) -> tuple:
         """
@@ -55,7 +55,7 @@ class Proxy:
         print("CMD (e.g., 'client_drop 0.2', 1) options, 2) current_setup, or 3/q quit): ".rstrip())
         packet = self.proxy_socket.recvfrom(1024)
         ip, port = packet[0], packet[1]
-        return self.FIRST_INDEX, ip, port
+        return ip, port
 
     def proxy_receive(self, data: bytes, addr: tuple) -> tuple:
         """
@@ -72,7 +72,7 @@ class Proxy:
 
         message = data.decode()
         print(f"Recieved: {addr}: {message}")
-        return self.FIRST_INDEX, addr, message
+        return addr, message
 
     def proxy_response(self, address: tuple, message: str):
         """
@@ -87,7 +87,6 @@ class Proxy:
             self.to_client(encoded_message)
         else:
             self.to_server(encoded_message)
-        return self.FIRST_INDEX
 
     def to_client(self, message: bytes):
         """
@@ -102,7 +101,7 @@ class Proxy:
         if self.does_packet_delay(self.server_delay):
             # print(f"Server Packet is delayed by {self.server_delay_time} seconds")
             self.delay_by_seconds(self.server_delay_time);
-        self.proxy_socket.sendto(message,(self.client_ip, self.client_port) )
+        self.proxy_socket.sendto(message, (self.client_ip, self.client_port))
 
 
     def to_server(self, message: bytes):

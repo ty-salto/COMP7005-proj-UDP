@@ -141,19 +141,19 @@ class Proxy:
 
     def delay_by_seconds(self, delay_time: str) -> None:
         """
-        Delays packet send by seconds
+        Delays packet send by milliseconds
 
-        @param delay_time: range of delay time in seconds
+        @param delay_time: range of delay time in milliseconds
         """
         if "-" in delay_time:
             lower, upper = delay_time.split("-")
             delay = random.randrange(int(lower), int(upper)) if valid_fixed_or_range_number(lower) and valid_fixed_or_range_number(upper) else 0
             print(f"Packet is delayed by {delay} second(s)")
-            time.sleep(delay)
+            time.sleep(delay/1000)
         else:
             delay = int(delay_time)
             print(f"Packet is delayed by {delay} second(s)")
-            time.sleep(delay)
+            time.sleep(delay/1000)
 
     def is_server(self, ip, port) -> bool:
         if ip == self.target_ip and port == self.target_port:

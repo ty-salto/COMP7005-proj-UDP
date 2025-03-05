@@ -31,10 +31,10 @@ class Proxy:
             self.client_port = None
             self.target_ip = target_ip
             self.target_port = target_port
-            self.client_drop = client_drop
-            self.server_drop = server_drop
-            self.client_delay = client_delay
-            self.server_delay = server_delay
+            self.client_drop = float (client_drop) / Proxy.HUNDRED
+            self.server_drop = float (server_drop) / Proxy.HUNDRED
+            self.client_delay = float (client_delay) / Proxy.HUNDRED
+            self.server_delay = float (server_delay) / Proxy.HUNDRED
             self.server_delay_time = server_delay_time
             self.client_delay_time = client_delay_time
             self.proxy_socket = socket.socket()
@@ -201,10 +201,10 @@ class Proxy:
                         self.update_parameter(param, value)
                     elif len(user_input) == 5:
                         c_drop, s_drop, c_delay, s_delay, delay_time = user_input
-                        self.client_drop = c_drop
-                        self.server_drop = s_drop
-                        self.client_delay = c_delay
-                        self.server_delay = s_delay
+                        self.client_drop = int(c_drop) / Proxy.HUNDRED
+                        self.server_drop = int(s_drop) / Proxy.HUNDRED
+                        self.client_delay = int(c_delay) / Proxy.HUNDRED
+                        self.server_delay = int(s_delay) / Proxy.HUNDRED
                         self.client_delay_time = delay_time
                         self.server_delay_time = delay_time
                     else:

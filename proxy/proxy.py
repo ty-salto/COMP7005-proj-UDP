@@ -31,10 +31,10 @@ class Proxy:
             self.client_port = None
             self.target_ip = target_ip
             self.target_port = target_port
-            self.client_drop = float (client_drop) / Proxy.HUNDRED
-            self.server_drop = float (server_drop) / Proxy.HUNDRED
-            self.client_delay = float (client_delay) / Proxy.HUNDRED
-            self.server_delay = float (server_delay) / Proxy.HUNDRED
+            self.client_drop = client_drop / Proxy.HUNDRED
+            self.server_drop = server_drop / Proxy.HUNDRED
+            self.client_delay = client_delay / Proxy.HUNDRED
+            self.server_delay = server_delay / Proxy.HUNDRED
             self.server_delay_time = server_delay_time
             self.client_delay_time = client_delay_time
             self.proxy_socket = socket.socket()

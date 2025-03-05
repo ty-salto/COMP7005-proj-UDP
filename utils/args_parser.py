@@ -4,7 +4,8 @@ import json
 class ArgsParser:
     TYPE_MAP = {
         "str": str,
-        "int": int
+        "int": int,
+        "float": float,
     }
 
     def __init__(self, appname, filepath):

@@ -27,7 +27,7 @@ class Proxy:
         self.server_delay_time = "1-3"
         self.client_delay_time = "2"
         self.proxy_socket = socket.socket()
-        self.running = True
+
         self.start_monitoring()
 
     def proxy_init(self):
@@ -43,7 +43,6 @@ class Proxy:
         print(f"Proxy Ready - server is listening on {self.listen_ip}:{self.listen_port}")
         self.proxy_socket.bind((self.listen_ip, self.listen_port))
         display.options()
-
 
     def proxy_listen(self) -> tuple:
         """
@@ -74,7 +73,7 @@ class Proxy:
         print(f"Recieved: {addr}: {message}")
         return addr, message
 
-    def proxy_response(self, address: tuple, message: str):
+    def proxy_response(self, address: tuple, message: str) -> None:
         """
         Sends response to client/server
 
@@ -88,7 +87,7 @@ class Proxy:
         else:
             self.to_server(encoded_message)
 
-    def to_client(self, message: bytes):
+    def to_client(self, message: bytes) -> None:
         """
         Sends message to client
 
@@ -103,8 +102,7 @@ class Proxy:
             self.delay_by_seconds(self.server_delay_time);
         self.proxy_socket.sendto(message, (self.client_ip, self.client_port))
 
-
-    def to_server(self, message: bytes):
+    def to_server(self, message: bytes) -> None:
         """
         Sends message to server
 
@@ -119,7 +117,7 @@ class Proxy:
             self.delay_by_seconds(self.client_delay_time);
         self.proxy_socket.sendto(message,(self.target_ip, self.target_port) )
 
-    def does_packet_delay(self, delay_chance: float):
+    def does_packet_delay(self, delay_chance: float) -> bool:
         """
         Determines if packet should be delayed
 
@@ -128,8 +126,9 @@ class Proxy:
         """
         if random.random() < delay_chance:
            return True
+        return False
 
-    def does_packet_drop(self, delay_chance):
+    def does_packet_drop(self, delay_chance: float) -> bool:
         """
         Determines if packet should be dropped
 
@@ -138,8 +137,9 @@ class Proxy:
         """
         if random.random() < delay_chance:
             return True
+        return False
 
-    def delay_by_seconds(self, delay_time):
+    def delay_by_seconds(self, delay_time: str) -> None:
         """
         Delays packet send by seconds
 
@@ -164,7 +164,7 @@ class Proxy:
             """
             Monitors user input to change proxy parameters dynamically.
             """
-            while self.running:
+            while True:
                 try:
                     user_input = input("CMD (e.g., 'client_drop 0.2', 1, 2, or q): ").strip().split()
                     if len(user_input) == 1:
@@ -194,7 +194,7 @@ class Proxy:
                 except Exception as e:
                     print(f"Error: {e}")
 
-    def update_parameter(self, param, value):
+    def update_parameter(self, param: str, value: str) -> None:
         """
         Update a parameter value.
 
@@ -222,10 +222,8 @@ class Proxy:
             print(f"Invalid parameter: {param}")
             print("Invalid input. Usage: <parameter> <value>\n")
 
-
-    def start_monitoring(self):
+    def start_monitoring(self) -> None:
         """
         Starts the user input monitoring thread.
         """
-        self.running = True
         threading.Thread(target=self.monitor_user_input, daemon=True).start()

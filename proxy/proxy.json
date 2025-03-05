@@ -1,14 +1,68 @@
 {
-  "ip": {
-    "arg": "--ip",
+  "listen_ip": {
+    "arg": "--listen-ip",
     "help": "Proxy IP Address",
     "type": "str",
     "required": "true"
   },
-  "port": {
-    "arg": "--port",
+  "listen_port": {
+    "arg": "--listen-port",
     "help": "Proxy Port Number",
     "type": "int",
     "required": "true"
+  },
+  "target_ip": {
+    "arg": "--target-ip",
+    "help": "Target IP Address",
+    "type": "str",
+    "required": "false"
+  },
+  "target_port": {
+    "arg": "--target-port",
+    "help": "Target Port Number",
+    "type": "int",
+    "required": "false"
+  },
+  "client_drop": {
+    "arg": "--client-drop",
+    "help": "Client Drop Rate",
+    "type": "float",
+    "required": "false"
+  },
+  "server_drop": {
+    "arg": "--server-drop",
+    "help": "Server Drop Rate",
+    "type": "float",
+    "required": "false"
+  },
+  "client_delay": {
+    "arg": "--client-delay",
+    "help": "Client Delay Rate",
+    "type": "float",
+    "required": "false"
+  },
+  "server_delay": {
+    "arg": "--server-delay",
+    "help": "Server Delay Rate",
+    "type": "float",
+    "required": "false"
+  },
+  "server_delay_time": {
+    "arg": "--server-delay-time",
+    "help": "Server Delay Time Range",
+    "type": "str",
+    "required": "false"
+  },
+  "client_delay_time": {
+    "arg": "--client-delay-time",
+    "help": "Client Delay Time Range",
+    "type": "str",
+    "required": "false"
+  },
+  "preset": {
+    "arg": "--preset",
+    "help": "Preset configuration",
+    "type": "str",
+    "required": "false"
   }
 }

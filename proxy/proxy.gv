@@ -1,0 +1,7 @@
+
+digraph StateMachine {
+    INIT -> LISTEN;
+    LISTEN -> RECEIVE;
+    RECEIVE -> SEND;
+    SEND -> LISTEN;
+}

@@ -1,11 +1,10 @@
-import enum
 import json
 import inspect
 
 
 
 class StateMachine:
-    def __init__(self, class_state, class_ref, state_action_file, state_transition_file):
+    def __init__(self, class_state, class_ref: object, state_action_file: str, state_transition_file:str):
         self.class_ref = class_ref
         self.state_actions = {}
         self.state_transition = {}
@@ -17,6 +16,10 @@ class StateMachine:
 
 
     def __generate_state_action(self, filepath):
+        """
+        Generate state-action mapping from JSON file.
+        This populates the state_actions dictionary where the key is the state and the value is derived from the class.
+        """
         with open(filepath) as f:
             state_action = json.load(f)
 
@@ -32,6 +35,10 @@ class StateMachine:
         print(self.state_actions)
 
     def __generate_state_transition(self, filepath):
+        """
+        Generate state-transition mapping from JSON file.
+        This populates the state_transition dictionary where the key is the state and the value is a list of states that can be transitioned to.
+        """
         with open(filepath) as f:
             state_action = json.load(f)
         try:
@@ -48,25 +55,36 @@ class StateMachine:
         print(self.state_transition)
 
     def run(self,*args):
+        """
+        Run the state machine.
+        This method executes the actions associated with the current state and transitions to the next state based on the returned index.
+        First 5 integers of the returned tuple are used to transition to the next state.
+        """
         isRun = True
         while isRun:
             action = self.state_actions[self.current_state]
 
-            if action:
+            if action: # Checks to see if there is an action associated with the current state
                 signature = inspect.signature(action)
                 param_count = len(signature.parameters)
 
-                if param_count == 0:
-                    result = action()
-                else:
-                    result = action(*args)
+                result = action() if param_count == 0 else action(*args) # Executes the action with the appropriate arguments
 
+                # if param_count == 0:
+                #     result = action()
+                # else:
+                #     result = action(*args)
+
+                # Checks to see if the result is a tuple and if the first element is an integer less than 5 (This will represent the next state index)
                 if isinstance(result, tuple):
-                    next_state_index, *next_args = result  # Unpack tuple as arguments for next state
+                    if isinstance(result[0], int) and result[0] < 5:
+                        next_state_index, *next_args = result  # Unpack tuple
+                    else:
+                        next_state_index = 0
+                        next_args = result
                 else:
-                    next_state_index = result
+                    next_state_index = result if result != None else 0
                     next_args = ()
-
 
             if self.current_state in self.state_transition:
                 next_states = self.state_transition[self.current_state]

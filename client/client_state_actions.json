@@ -1,6 +1,7 @@
 {
     "INIT": "client_init",
-    "PROCESS" : "client_message",
+    "INPUT" : "client_message",
+    "PROCESS":"client_packet_to_send",
     "SEND": "client_send",
     "RECEIVE": "client_receive",
     "CLOSING" : "client_closing"

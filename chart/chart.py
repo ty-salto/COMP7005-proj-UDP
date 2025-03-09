@@ -88,17 +88,3 @@ class Chart:
         plt.legend()
         plt.grid(True)
         plt.show()
-
-
-# chart = Chart()
-
-# # Simulating some increments over time
-# import time
-# for _ in range(10):
-#     time.sleep(1)
-#     chart.increment_chart_param("client_packet_received")
-#     chart.increment_chart_param("server_packet_sent")
-
-# # Generate charts
-# chart.generate_server_chart()
-# chart.generate_client_chart()

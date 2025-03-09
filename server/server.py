@@ -1,5 +1,6 @@
 import socket
 from chart.socket_chart import SocketChart
+from ast import increment_lineno
 class Server:
     FIRST_INDEX = 0
 
@@ -39,13 +40,13 @@ class Server:
         data, client_addr = client_packet
         print(f"\t\tSender IP:{client_addr[0]}\n\t\tSender Port:{client_addr[1]}")
         print(f"\t\tPacket Data:\n\t\t\t{client_packet[0].decode()}")
-        self.chart.increment_chart_param("packet_received")
+        self.chart.increment_packet_received()
         return self.FIRST_INDEX, data, client_addr
 
     def server_response(self, newPacket, ip, port):
         print(f"\t-Server Responding...\n\t\tip: {ip}\n\t\tport: {port}...")
         self.server_socket.sendto(newPacket.encode(), (ip,port))
-        self.chart.increment_chart_param("packet_sent")
+        self.chart.increment_packet_sent()
 
         return self.FIRST_INDEX
 

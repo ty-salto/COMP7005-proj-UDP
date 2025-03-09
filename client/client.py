@@ -62,8 +62,10 @@ class Client:
 
         if not events:
             if self.retransmit_count < self.RETRANSMIT_COUNT_LIMIT:
+                self.chart.increment_packet_dropped()
                 print(f"\t-Timeout: Retransmit (count:{self.retransmit_count + 1})")
                 self.retransmit_count += 1
+                self.chart.append_retransmit_attempts_ratio(self.retransmit_count, self.RETRANSMIT_COUNT_LIMIT)
                 return self.FIRST_INDEX
             else:
                 self.message_buffer_dict.pop(self.uid_to_send)
@@ -141,8 +143,7 @@ class Client:
 
         if int(flag) == 2:
             print(f"\t\t\tACK received({server_addr[0]}): flag:{flag}; uid:{uid}; seq:{seq}")
-            self.chart.increment_received()
-            self.chart.append_retransmit_attempts_ratio(self.retransmit_count, self.RETRANSMIT_COUNT_LIMIT)
+            self.chart.increment_packet_received()
 
             if uid in self.message_buffer_dict:
                 buffer_packets = self.message_buffer_dict[uid]

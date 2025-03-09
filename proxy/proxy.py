@@ -6,6 +6,7 @@ from chart.socket_chart import SocketChart
 from utils.helper import valid_fixed_or_range_number
 import threading
 import proxy.display_options as display
+from ast import increment_lineno
 
 
 class Proxy:
@@ -40,8 +41,7 @@ class Proxy:
             self.server_delay_time = server_delay_time
             self.client_delay_time = client_delay_time
             self.proxy_socket = socket.socket()
-            self.chart = Chart()
-            self.socket_chart = SocketChart("Proxy")
+            self.chart = SocketChart("Proxy")
             self.display_options = False
             self.monitor_thread_condition = True
             self.monitor_thread = threading.Thread(target=self.monitor_user_input, daemon=True)
@@ -81,6 +81,7 @@ class Proxy:
             except socket.timeout:
                 if not self.monitor_thread_condition:
                     self.close()
+
     def proxy_receive(self, data: bytes, addr: tuple) -> tuple:
         """
         Receives packet from client/server
@@ -92,12 +93,11 @@ class Proxy:
         """
         if not self.is_server(addr[0], addr[1]):
             print("Proxy Receiving from Client")
-            self.chart.increment_chart_param("client_packet_received")
             self.client_ip, self.client_port = addr[0], addr[1]
-        elif self.is_server(addr[0], addr[1]):
-            self.chart.increment_chart_param("server_packet_received")
+
 
         message = data.decode()
+        self.chart.increment_packet_received()
         print(f"Recieved: {addr}: {message}")
         return addr, message
 
@@ -124,12 +124,11 @@ class Proxy:
         print("Proxy forwarding to Client", self.client_ip, self.client_port)
         if self.does_packet_drop(self.server_drop):
             print("Server Packet to Client Fails")
-            self.chart.increment_chart_param("server_packet_dropped")
             return
         if self.does_packet_delay(self.server_delay):
             # print(f"Server Packet is delayed by {self.server_delay_time} seconds")
             self.delay_by_seconds(self.server_delay_time);
-        self.chart.increment_chart_param("server_packet_sent")
+        self.chart.increment_packet_sent()
         self.proxy_socket.sendto(message, (self.client_ip, self.client_port))
 
     def to_server(self, message: bytes) -> None:
@@ -141,13 +140,12 @@ class Proxy:
         print("Proxy forwarding to Server")
         if self.does_packet_drop(self.client_drop):
             print("Client Packet to Server Fails")
-            self.chart.increment_chart_param("client_packet_dropped")
             return
         if self.does_packet_delay(self.client_delay):
             print("Client ")
             self.delay_by_seconds(self.client_delay_time);
-        self.chart.increment_chart_param("client_packet_sent")
-        print("From Line 137 - Sending Message to Server: ", message, self.target_ip, self.target_port)
+        # print("From Line 137 - Sending Message to Server: ", message, self.target_ip, self.target_port)
+        self.chart.increment_packet_sent()
         self.proxy_socket.sendto(message,(self.target_ip, self.target_port) )
 
     def does_packet_delay(self, delay_chance: float) -> bool:
@@ -221,6 +219,9 @@ class Proxy:
                             self.monitor_thread_condition = False
                         elif command == "o":
                             self.display_options = not self.display_options
+                        elif command == "reset":
+                            self.reset_parameters()
+                            print("Parameters reset")
                         elif  command == "q":
                             self.proxy_socket.close()
                             exit()
@@ -246,11 +247,18 @@ class Proxy:
         """
         Closes the proxy server and joins the monitor thread.
         """
-        print("Geneating Chart")
-        self.chart.generate_client_chart()
-        self.chart.generate_server_chart()
+        print("Generating Chart")
+        self.chart.generate_chart()
         self.proxy_socket.close()
         exit()
+
+    def reset_parameters(self):
+        self.client_drop = 0
+        self.server_drop = 0
+        self.client_delay = 0
+        self.server_delay = 0
+        self.client_delay_time = ""
+        self.server_delay_time = ""
 
 
     def update_parameter(self, param: str, value: str) -> None:

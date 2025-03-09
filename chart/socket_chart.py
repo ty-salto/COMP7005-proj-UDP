@@ -49,19 +49,37 @@ class SocketChart:
         else:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{param}'")
 
+    def increment_packet_sent(self):
+        elapsed_time = (datetime.datetime.now() - self.time_start).total_seconds()
+        self.time_elapsed.append(elapsed_time)
+        self.packet_sent += 1
+        self.info["packet_sent"].append(self.packet_sent)
+
+    def increment_packet_dropped(self):
+        elapsed_time = (datetime.datetime.now() - self.time_start).total_seconds()
+        self.time_elapsed.append(elapsed_time)
+        self.packet_dropped += 1
+        self.info["packet_dropped"].append(self.packet_dropped)
+
     def append_retransmit_attempts_ratio(self, amount: float, limit: int):
         """Append the retransmit ratio to the chart data."""
-        # print("Appending retransmit ratio", amount/limit)
-
-        self.info["packet_retransmitted"].append(amount)
+        elapsed_time = (datetime.datetime.now() - self.time_start).total_seconds()
+        self.time_elapsed.append(elapsed_time)
         self.packet_retransmitted += amount
+        self.info["packet_retransmitted"].append(amount/limit)
 
-    def increment_received(self):
+    def increment_packet_received(self):
         """Append the received ratio to the chart data."""
+        elapsed_time = (datetime.datetime.now() - self.time_start).total_seconds()
+        self.time_elapsed.append(elapsed_time)
         self.packet_received += 1
-        self.info["packet_received"].append(self.packet_received/self.packet_sent)
+        if self.packet_sent <= 0:
+            self.info["packet_received"].append(0)
+        else:
+            self.info["packet_received"].append(self.packet_received/self.packet_sent)
 
     def generate_chart(self):
+        self.display_current_stats()
         figure, axis = plt.subplots(2, 2, figsize=(12, 8))
         figure.suptitle(f"{self.socket_name} Packet Analysis", fontsize=14)
         print(self.info.items())
@@ -74,7 +92,7 @@ class SocketChart:
         axis[0, 0].set_ylim(0, max(self.info["packet_sent"])+1)
 
 
-        # Packets Received
+        # ACK RATIO
         axis[0, 1].plot(self.time_elapsed[:len(self.info["packet_received"])], self.info["packet_received"], label="Received")
         axis[0, 1].set_title("Packets Ratio Over Time", fontsize=10)
         axis[0, 1].set_ylim(0, 1)

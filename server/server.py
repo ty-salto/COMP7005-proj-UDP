@@ -1,5 +1,5 @@
 import socket
-
+from chart.socket_chart import SocketChart
 class Server:
     FIRST_INDEX = 0
 
@@ -8,6 +8,7 @@ class Server:
         self.server_port = server_port
         self.server_socket = None
         self.uid_seq_dict = {}
+        self.chart = SocketChart("Server")
 
 
     def server_init(self):
@@ -16,21 +17,21 @@ class Server:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,0)
 
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        
-        
+
+
         print("\t-Server Binding...")
         self.server_socket.bind((self.server_ip, self.server_port))
 
         return self.FIRST_INDEX
 
-    
+
     def server_listen(self):
 
         print("\t-Waiting..")
-
-        client_packet = self.server_socket.recvfrom(1024) 
+        print("Current Stats : ", self.uid_seq_dict)
+        client_packet = self.server_socket.recvfrom(1024)
         return self.FIRST_INDEX, client_packet# return tuple [data, client_addr]
-        
+
 
     def server_receive(self, client_packet):
         print("\t-Server Receiving...")
@@ -38,11 +39,13 @@ class Server:
         data, client_addr = client_packet
         print(f"\t\tSender IP:{client_addr[0]}\n\t\tSender Port:{client_addr[1]}")
         print(f"\t\tPacket Data:\n\t\t\t{client_packet[0].decode()}")
+        self.chart.increment_chart_param("packet_received")
         return self.FIRST_INDEX, data, client_addr
 
     def server_response(self, newPacket, ip, port):
         print(f"\t-Server Responding...\n\t\tip: {ip}\n\t\tport: {port}...")
         self.server_socket.sendto(newPacket.encode(), (ip,port))
+        self.chart.increment_chart_param("packet_sent")
 
         return self.FIRST_INDEX
 

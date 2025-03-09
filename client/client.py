@@ -146,6 +146,9 @@ class Client:
                     if buffer_packets[i][0] == int(seq):
                         print("\t\t-Removing seq...")
                         buffer_packets.pop(i)
+
+                        # reset retranmission count if ack received for the seq. 
+                        self.retransmit_count = 0
                         break
                 
                 if not buffer_packets:

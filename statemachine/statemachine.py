@@ -70,11 +70,6 @@ class StateMachine:
 
                 result = action() if param_count == 0 else action(*args) # Executes the action with the appropriate arguments
 
-                # if param_count == 0:
-                #     result = action()
-                # else:
-                #     result = action(*args)
-
                 # Checks to see if the result is a tuple and if the first element is an integer less than 5 (This will represent the next state index)
                 if isinstance(result, tuple):
                     if isinstance(result[0], int) and result[0] < 5:

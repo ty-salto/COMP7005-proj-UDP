@@ -1,3 +1,4 @@
+import secrets
 def is_valid_address_port(addrport, is_port):
     if not addrport:
         raise ValueError("Missing Arguments: usage -ip <ip> -port <port>")
@@ -43,3 +44,7 @@ def read_file(file):
             return f.read()
     except Exception as e:
         print("File Error", e)
+
+def packet_uid_generator() -> str:
+    return secrets.token_hex(8)
+

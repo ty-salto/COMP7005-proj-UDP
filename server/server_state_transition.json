@@ -1,6 +1,7 @@
 {
     "INIT": ["LISTEN"],
     "LISTEN": ["RECEIVE"],
-    "RECEIVE": ["SEND"],
+    "RECEIVE": ["PROCESS"],
+    "PROCESS": ["SEND"],
     "SEND": ["LISTEN"]
 }

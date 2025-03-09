@@ -2,5 +2,6 @@
     "INIT": "server_init",
     "LISTEN": "server_listen",
     "RECEIVE": "server_receive",
+    "PROCESS" : "server_packet_process",
     "SEND": "server_response"
 }

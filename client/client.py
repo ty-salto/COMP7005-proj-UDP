@@ -5,8 +5,9 @@ import select
 from utils.helper import packet_uid_generator
 
 class Client:
-    FIRST_INDEX, SECOND_INDEX = (0,1)
+    FIRST_INDEX, SECOND_INDEX, THIRD_INDEX = (0,1,2)
     RETRANSMIT_COUNT_LIMIT = 10
+    TIMEOUT_TIME = 300
 
     def __init__(self, client_ip, client_port):
 
@@ -20,30 +21,32 @@ class Client:
     def client_init(self):
         print("Client Initialize...")
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,0)
+        self.poll.register(self.client_socket, select.POLLIN)
         print("Type your message and press Enter. Type 'exit' to quit.")
         return self.FIRST_INDEX
     
     def client_message(self):
         message = input("You: ")
+
+        print("\tSYSTEM INFO:")
         
         if message.lower() == "exit":
-            print("Closing connection...")
+            print("\t\t-Closing connection...")
             return self.SECOND_INDEX
         
         return  self.FIRST_INDEX ,message
 
         
     def client_send(self):
-        print("Client Sending...")
+        print("\t\t-Client Sending...")
 
         # always the first uid
         # works only for python 3.7+ where dictionary is ordered by first input
-        ##uid_to_send = list(self.message_buffer_dict.keys())[0] 
         self.uid_to_send = next(iter(self.message_buffer_dict.keys()))
-
-        print(self.message_buffer_dict[self.uid_to_send])
         
-        packet_to_send= self.message_buffer_dict[self.uid_to_send][0][1]
+        print(f"\t\t\tuid:{self.uid_to_send}; seq:{self.message_buffer_dict.get(self.uid_to_send)[0][0]}")
+
+        packet_to_send = self.message_buffer_dict[self.uid_to_send][0][1]
 
         self.client_socket.sendto(packet_to_send.encode(), (self.client_ip, self.client_port))
         
@@ -51,15 +54,13 @@ class Client:
 
 
     def client_receive(self):
-        print("Client Receiving...")
+        print("\t\t-Client Receiving...")
 
-        self.poll.register(self.client_socket, select.POLLIN)
-
-        events = self.poll.poll(300) ## in miliseconds
+        events = self.poll.poll(self.TIMEOUT_TIME) ## in miliseconds
 
         if not events:
             if self.retransmit_count < self.RETRANSMIT_COUNT_LIMIT:
-                print("Timeout: Retransmit")
+                print(f"\t-Timeout: Retransmit (count:{self.retransmit_count + 1})")
                 self.retransmit_count += 1
                 return self.FIRST_INDEX
             else:
@@ -67,31 +68,11 @@ class Client:
                 self.retransmit_count = 0
                 return self.SECOND_INDEX
 
-        data, client_addr = self.client_socket.recvfrom(1024)
-
-        # needs to change to parse the message receive
-        uid_receive = next(iter(self.message_buffer_dict.keys())) 
-        packet_count = len(self.message_buffer_dict[uid_receive])
-        packet_seq= self.message_buffer_dict[uid_receive][0][0]
-
-
-        print(f"Received ({client_addr}): {data.decode()}")
-
-        for i in range(0,packet_count):
-            if self.message_buffer_dict[uid_receive][i][0] == packet_seq:
-                self.message_buffer_dict[uid_receive].pop(i)
-
-                if len(self.message_buffer_dict[uid_receive]) == 0:
-                    self.message_buffer_dict.pop(uid_receive)
-                    return self.SECOND_INDEX
-                
-                return self.FIRST_INDEX
-
-
-        return self.SECOND_INDEX
+        recv_packet = self.client_socket.recvfrom(1024)
+        return self.THIRD_INDEX, recv_packet
     
     def client_closing(self):
-        print("Closing client socket...")
+        print("\t\t-Closing client socket...")
         self.client_socket.close()
 
     '''
@@ -119,20 +100,23 @@ class Client:
         Max: 282 character => 282 bytes
     '''
     def client_packet_to_send(self, message):
-        print("Processing Packets to send...")
+        print("\t\t-Processing Packets to send...")
         
         message_len = len(message)
         packet_count = math.ceil(message_len/255) if message_len != 0 else 0
         prev_seq = 0
         message_uid = packet_uid_generator()
 
+        # sends empty message
         if packet_count == 0:
             packet_struct = f"12|{message_uid}|{prev_seq}|"
             self.message_buffer_dict[message_uid] = [(0, packet_struct)]
             return self.FIRST_INDEX
             
+        # Initialize a packet list based from th message uid
         self.message_buffer_dict[message_uid] = []
         
+        # divides the packets if the message length is more than 255 char
         for i in range(0, packet_count):
             curr_seq = prev_seq + min(255, message_len - prev_seq)
             curr_packet_message = message[prev_seq:curr_seq]
@@ -145,6 +129,35 @@ class Client:
             prev_seq = curr_seq
         
         return self.FIRST_INDEX
+    
+    def client_packet_receive(self, recv_packet):
+        packet, server_addr = recv_packet
+        flag, uid, seq, message = packet.decode().split('|', 3)
+
+        # packet_count = len(self.message_buffer_dict[uid])
+
+        if int(flag) == 2:
+            print(f"\t\t\tACK received({server_addr[0]}): flag:{flag}; uid:{uid}; seq:{seq}")
+
+            if uid in self.message_buffer_dict:
+                buffer_packets = self.message_buffer_dict[uid]
+
+                for i in range(len(buffer_packets)):
+                    if buffer_packets[i][0] == int(seq):
+                        print("\t\t-Removing seq...")
+                        buffer_packets.pop(i)
+                        break
+                
+                if not buffer_packets:
+                    self.message_buffer_dict.pop(uid)
+                    print("\t\t-Deleting uid...")
+                else:
+                    return self.SECOND_INDEX
+
+
+        return self.FIRST_INDEX
+
+
 
 
 

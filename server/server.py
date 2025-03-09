@@ -7,16 +7,18 @@ class Server:
         self.server_ip = server_ip
         self.server_port = server_port
         self.server_socket = None
+        self.uid_seq_dict = {}
 
 
     def server_init(self):
-        print("Server Initialize...")
+        print("SYSTEM INFO:")
+        print("\t-Server Initialize...")
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,0)
 
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         
         
-        print("Server Binding...")
+        print("\t-Server Binding...")
         self.server_socket.bind((self.server_ip, self.server_port))
 
         return self.FIRST_INDEX
@@ -24,22 +26,64 @@ class Server:
     
     def server_listen(self):
 
-        print("Waiting..")
-        data, client_addr = self.server_socket.recvfrom(1024) 
-        return self.FIRST_INDEX, data, client_addr # return tuple [data, client_addr]
+        print("\t-Waiting..")
+
+        client_packet = self.server_socket.recvfrom(1024) 
+        return self.FIRST_INDEX, client_packet# return tuple [data, client_addr]
         
 
-    def server_receive(self, data, client_addr):
+    def server_receive(self, client_packet):
+        print("\t-Server Receiving...")
 
-        print("Server Receiving...")
-        print(f"Received ({client_addr}): {data.decode()}")
-        ip, port = client_addr
-        return self.FIRST_INDEX, ip, port
+        data, client_addr = client_packet
+        print(f"\t\tSender IP:{client_addr[0]}\n\t\tSender Port:{client_addr[1]}")
+        print(f"\t\tPacket Data:\n\t\t\t{client_packet[0].decode()}")
+        return self.FIRST_INDEX, data, client_addr
 
-    def server_response(self, ip, port):
-        print("Server Resonding...")
-        self.server_socket.sendto("received!\n".encode(), (ip,port))
+    def server_response(self, newPacket, ip, port):
+        print(f"\t-Server Responding...\n\t\tip: {ip}\n\t\tport: {port}...")
+        self.server_socket.sendto(newPacket.encode(), (ip,port))
+
         return self.FIRST_INDEX
 
+    '''
+        Packet structure:
+        <flag:int>|<UID:8bytes/16hex char>|<seq:0-999,999>|<message:255char>
 
-        
+        flgs:
+        1000 - rst -> Reset Flag
+        0100 - seq -> Sequence Flag
+        0010 - ack -> Acknowledge Flag
+        0001 - fin -> Finish/End Flag
+
+
+        UID:
+        Random generated 8 bytes value in 16 hex character
+
+        seq:
+        Packet sequence number based on the message length
+
+        message:
+        The message being transmitted with max size of 255 character per packet
+
+        Total packet sturcture size (| included):
+        Min: 21 character => 21 bytes (sending blank message allowed)
+        Max: 282 character => 282 bytes
+    '''
+    def server_packet_process(self, packet: str, client_addr: tuple):
+        print(f"\t-Server Packet processing")
+        flag, uid, seq, message = packet.decode().split('|', 3)
+        ip, port = client_addr
+
+        if int(flag) == 12: # reset
+            print("\t\tRST Flag...")
+            self.uid_seq_dict[uid] = [seq]
+        elif int(flag) == 4:
+            print("\t\tSEQ Flag...")
+            seq_list = self.uid_seq_dict.get(uid)
+
+            if seq not in seq_list:
+                seq_list.append(seq)
+
+        ack_packet = f"2|{uid}|{seq}|"
+        return self.FIRST_INDEX, ack_packet, ip, port

@@ -65,7 +65,6 @@ class Client:
                 self.chart.increment_packet_dropped()
                 print(f"\t-Timeout: Retransmit (count:{self.retransmit_count + 1})")
                 self.retransmit_count += 1
-                self.chart.append_retransmit_attempts_ratio(self.retransmit_count, self.RETRANSMIT_COUNT_LIMIT)
                 return self.FIRST_INDEX
             else:
                 self.message_buffer_dict.pop(self.uid_to_send)
@@ -152,8 +151,8 @@ class Client:
                     if buffer_packets[i][0] == int(seq):
                         print("\t\t-Removing seq...")
                         buffer_packets.pop(i)
-
-                        # reset retranmission count if ack received for the seq. 
+                        self.chart.append_retransmit_packet(self.retransmit_count, self.RETRANSMIT_COUNT_LIMIT)
+                        # reset retranmission count if ack received for the seq.
                         self.retransmit_count = 0
                         break
 

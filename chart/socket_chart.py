@@ -49,29 +49,32 @@ class SocketChart:
         else:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{param}'")
 
-    def increment_packet_sent(self):
+    def create_timestamp(self):
+        """
+        Create a timestamp for the current time. These will be used for some x-values in the chart.
+        """
         elapsed_time = (datetime.datetime.now() - self.time_start).total_seconds()
         self.time_elapsed.append(elapsed_time)
+
+    def increment_packet_sent(self):
+        self.create_timestamp()
         self.packet_sent += 1
         self.info["packet_sent"].append(self.packet_sent)
 
     def increment_packet_dropped(self):
-        elapsed_time = (datetime.datetime.now() - self.time_start).total_seconds()
-        self.time_elapsed.append(elapsed_time)
+        self.create_timestamp()
         self.packet_dropped += 1
         self.info["packet_dropped"].append(self.packet_dropped)
 
-    def append_retransmit_attempts_ratio(self, amount: float, limit: int):
+    def append_retransmit_packet(self, amount: float, limit: int):
         """Append the retransmit ratio to the chart data."""
-        elapsed_time = (datetime.datetime.now() - self.time_start).total_seconds()
-        self.time_elapsed.append(elapsed_time)
+        self.create_timestamp()
         self.packet_retransmitted += amount
-        self.info["packet_retransmitted"].append(amount/limit)
+        self.info["packet_retransmitted"].append(amount)
 
     def increment_packet_received(self):
         """Append the received ratio to the chart data."""
-        elapsed_time = (datetime.datetime.now() - self.time_start).total_seconds()
-        self.time_elapsed.append(elapsed_time)
+        self.create_timestamp()
         self.packet_received += 1
         if self.packet_sent <= 0:
             self.info["packet_received"].append(0)

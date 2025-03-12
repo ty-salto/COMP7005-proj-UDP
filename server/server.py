@@ -2,7 +2,7 @@ import socket
 from chart.socket_chart import SocketChart
 from ast import increment_lineno
 class Server:
-    FIRST_INDEX = 0
+    FIRST_INDEX, SECOND_INDEX = (0,1)
 
     def __init__(self, server_ip, server_port):
         self.server_ip = server_ip
@@ -27,21 +27,31 @@ class Server:
 
 
     def server_listen(self):
+        try:
+            print("\t-Waiting..")
+            print("Current Stats : ", self.uid_seq_dict)
+            client_packet = self.server_socket.recvfrom(1024)
+            return self.FIRST_INDEX, client_packet# return tuple [data, client_addr]
+        except KeyboardInterrupt:
+            return self.SECOND_INDEX
 
-        print("\t-Waiting..")
-        print("Current Stats : ", self.uid_seq_dict)
-        client_packet = self.server_socket.recvfrom(1024)
-        return self.FIRST_INDEX, client_packet# return tuple [data, client_addr]
 
 
     def server_receive(self, client_packet):
         print("\t-Server Receiving...")
 
-        data, client_addr = client_packet
+        packet, client_addr = client_packet
+        flag, uid, seq, message = packet.decode().split('|', 3)
+
         print(f"\t\tSender IP:{client_addr[0]}\n\t\tSender Port:{client_addr[1]}")
-        print(f"\t\tPacket Data:\n\t\t\t{client_packet[0].decode()}")
+        print(f"\t\tPacket Data:")
+        
+        if uid in self.uid_seq_dict and seq in self.uid_seq_dict.get(uid):
+            print(f"seq({seq}) Exist!")
+        else:
+            print(f"\t\t\t{client_packet[0].decode()}")
         self.chart.increment_packet_received()
-        return self.FIRST_INDEX, data, client_addr
+        return self.FIRST_INDEX, packet, client_addr
 
     def server_response(self, newPacket, ip, port):
         print(f"\t-Server Responding...\n\t\tip: {ip}\n\t\tport: {port}...")
@@ -90,3 +100,11 @@ class Server:
 
         ack_packet = f"2|{uid}|{seq}|"
         return self.FIRST_INDEX, ack_packet, ip, port
+    
+    def server_close(self):
+        if self.server_socket:
+            print("\t\t-Closing server socket...")
+            self.server_socket.close()
+            self.server_socket = None  # Ensure it's not used again
+            print("\t-Server Socket Closed.")
+        

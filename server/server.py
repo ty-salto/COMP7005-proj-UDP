@@ -47,7 +47,6 @@ class Server:
         print(f"\t-Server Responding...\n\t\tip: {ip}\n\t\tport: {port}...")
         self.server_socket.sendto(newPacket.encode(), (ip,port))
         self.chart.increment_packet_sent()
-
         return self.FIRST_INDEX
 
     '''

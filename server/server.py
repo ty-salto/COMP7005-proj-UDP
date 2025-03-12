@@ -1,15 +1,15 @@
 import socket
 from chart.socket_chart import SocketChart
-from ast import increment_lineno
+
 class Server:
     FIRST_INDEX, SECOND_INDEX = (0,1)
 
     def __init__(self, server_ip, server_port):
-        self.server_ip = server_ip
-        self.server_port = server_port
+        self.server_ip: str = server_ip
+        self.server_port: str = server_port
         self.server_socket = None
-        self.uid_seq_dict = {}
-        self.chart = SocketChart("Server")
+        self.uid_seq_dict: dict[str, set[str]] = {}
+        self.chart: SocketChart = SocketChart("Server")
 
 
     def server_init(self):
@@ -44,9 +44,10 @@ class Server:
         flag, uid, seq, message = packet.decode().split('|', 3)
 
         print(f"\t\tSender IP:{client_addr[0]}\n\t\tSender Port:{client_addr[1]}")
-        print(f"\t\tPacket Data:")
-        
+        print("\t\tPacket Data:")
+
         if uid in self.uid_seq_dict and seq in self.uid_seq_dict.get(uid):
+            self.chart.increment_packet_dropped()
             print(f"seq({seq}) Exist!")
         else:
             print(f"\t\t\t{client_packet[0].decode()}")
@@ -100,11 +101,12 @@ class Server:
 
         ack_packet = f"2|{uid}|{seq}|"
         return self.FIRST_INDEX, ack_packet, ip, port
-    
+
     def server_close(self):
         if self.server_socket:
             print("\t\t-Closing server socket...")
+            self.chart.generate_server_chart()
             self.server_socket.close()
             self.server_socket = None  # Ensure it's not used again
             print("\t-Server Socket Closed.")
-        
+            exit(0)

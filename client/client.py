@@ -32,6 +32,8 @@ class Client:
 
         print("\tSYSTEM INFO:")
 
+        if message.lower() == "g":
+            self.chart.generate_client_chart()
         if message.lower() == "exit":
             print("\t\t-Closing connection...")
             return self.SECOND_INDEX
@@ -51,7 +53,7 @@ class Client:
         packet_to_send = self.message_buffer_dict[self.uid_to_send][0][1]
 
         self.client_socket.sendto(packet_to_send.encode(), (self.client_ip, self.client_port))
-        self.chart.increment_chart_param('packet_sent')
+        self.chart.increment_packet_sent()
         return self.FIRST_INDEX
 
 
@@ -76,7 +78,7 @@ class Client:
 
     def client_closing(self):
         print("\t\t-Closing client socket...")
-        self.chart.generate_chart()
+        self.chart.generate_client_chart()
         self.client_socket.close()
 
     '''
@@ -151,6 +153,7 @@ class Client:
                     if buffer_packets[i][0] == int(seq):
                         print("\t\t-Removing seq...")
                         buffer_packets.pop(i)
+
                         self.chart.append_retransmit_packet(self.retransmit_count, self.RETRANSMIT_COUNT_LIMIT)
                         # reset retranmission count if ack received for the seq.
                         self.retransmit_count = 0

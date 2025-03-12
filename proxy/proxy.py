@@ -1,12 +1,11 @@
 import socket
 import time
 import random
-from chart.chart import Chart
 from chart.socket_chart import SocketChart
 from utils.helper import valid_fixed_or_range_number
 import threading
 import proxy.display_options as display
-from ast import increment_lineno
+
 
 
 class Proxy:
@@ -248,7 +247,6 @@ class Proxy:
         Closes the proxy server and joins the monitor thread.
         """
         print("Generating Chart")
-        self.chart.generate_chart()
         self.proxy_socket.close()
         exit()
 

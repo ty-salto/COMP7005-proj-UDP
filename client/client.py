@@ -2,6 +2,7 @@ import socket
 import math
 import select
 
+from chart.socket_chart import SocketChart
 from utils.helper import packet_uid_generator
 
 class Client:
@@ -16,6 +17,7 @@ class Client:
         self.message_buffer_dict = {}
         self.poll = select.poll()
         self.retransmit_count = 0
+        self.chart = SocketChart("Client")
 
 
     def client_init(self):
@@ -24,32 +26,32 @@ class Client:
         self.poll.register(self.client_socket, select.POLLIN)
         print("Type your message and press Enter. Type 'exit' to quit.")
         return self.FIRST_INDEX
-    
+
     def client_message(self):
         message = input("You: ")
 
         print("\tSYSTEM INFO:")
-        
+
         if message.lower() == "exit":
             print("\t\t-Closing connection...")
             return self.SECOND_INDEX
-        
+
         return  self.FIRST_INDEX ,message
 
-        
+
     def client_send(self):
         print("\t\t-Client Sending...")
 
         # always the first uid
         # works only for python 3.7+ where dictionary is ordered by first input
         self.uid_to_send = next(iter(self.message_buffer_dict.keys()))
-        
+
         print(f"\t\t\tuid:{self.uid_to_send}; seq:{self.message_buffer_dict.get(self.uid_to_send)[0][0]}")
 
         packet_to_send = self.message_buffer_dict[self.uid_to_send][0][1]
 
         self.client_socket.sendto(packet_to_send.encode(), (self.client_ip, self.client_port))
-        
+        self.chart.increment_chart_param('packet_sent')
         return self.FIRST_INDEX
 
 
@@ -60,6 +62,7 @@ class Client:
 
         if not events:
             if self.retransmit_count < self.RETRANSMIT_COUNT_LIMIT:
+                self.chart.increment_packet_dropped()
                 print(f"\t-Timeout: Retransmit (count:{self.retransmit_count + 1})")
                 self.retransmit_count += 1
                 return self.FIRST_INDEX
@@ -70,9 +73,10 @@ class Client:
 
         recv_packet = self.client_socket.recvfrom(1024)
         return self.THIRD_INDEX, recv_packet
-    
+
     def client_closing(self):
         print("\t\t-Closing client socket...")
+        self.chart.generate_chart()
         self.client_socket.close()
 
     '''
@@ -101,7 +105,7 @@ class Client:
     '''
     def client_packet_to_send(self, message):
         print("\t\t-Processing Packets to send...")
-        
+
         message_len = len(message)
         packet_count = math.ceil(message_len/255) if message_len != 0 else 0
         prev_seq = 0
@@ -112,10 +116,10 @@ class Client:
             packet_struct = f"12|{message_uid}|{prev_seq}|"
             self.message_buffer_dict[message_uid] = [(0, packet_struct)]
             return self.FIRST_INDEX
-            
+
         # Initialize a packet list based from th message uid
         self.message_buffer_dict[message_uid] = []
-        
+
         # divides the packets if the message length is more than 255 char
         for i in range(0, packet_count):
             curr_seq = prev_seq + min(255, message_len - prev_seq)
@@ -127,9 +131,9 @@ class Client:
             self.message_buffer_dict[message_uid].append((curr_seq, packet_struct))
 
             prev_seq = curr_seq
-        
+
         return self.FIRST_INDEX
-    
+
     def client_packet_receive(self, recv_packet):
         packet, server_addr = recv_packet
         flag, uid, seq, message = packet.decode().split('|', 3)
@@ -138,6 +142,7 @@ class Client:
 
         if int(flag) == 2:
             print(f"\t\t\tACK received({server_addr[0]}): flag:{flag}; uid:{uid}; seq:{seq}")
+            self.chart.increment_packet_received()
 
             if uid in self.message_buffer_dict:
                 buffer_packets = self.message_buffer_dict[uid]
@@ -146,11 +151,11 @@ class Client:
                     if buffer_packets[i][0] == int(seq):
                         print("\t\t-Removing seq...")
                         buffer_packets.pop(i)
-
-                        # reset retranmission count if ack received for the seq. 
+                        self.chart.append_retransmit_packet(self.retransmit_count, self.RETRANSMIT_COUNT_LIMIT)
+                        # reset retranmission count if ack received for the seq.
                         self.retransmit_count = 0
                         break
-                
+
                 if not buffer_packets:
                     self.message_buffer_dict.pop(uid)
                     print("\t\t-Deleting uid...")
@@ -159,9 +164,3 @@ class Client:
 
 
         return self.FIRST_INDEX
-
-
-
-
-
-

@@ -67,7 +67,6 @@ class Proxy:
         """
         if self.verbose:
             print("Waiting for Packets")
-        print("CMD (e.g., 'client_drop 0.2', 1) options, 2) current_setup, or 3/q quit): ".rstrip())
         while True:
             packet = self.proxy_socket.recvfrom(1024)
             ip, port = packet[0], packet[1]

@@ -1,0 +1,10 @@
+digraph StateMachine {
+    START -> INIT [label="server_init"];
+    INIT -> LISTEN [label="server_listen"];
+    LISTEN -> RECEIVE [label="server_receive"];
+    LISTEN -> CLOSING [label=server_close"];
+    RECEIVE -> PROCESS [label=server_packet_process"];
+    PROCESS -> SEND [label=server_response"];
+    SEND -> LISTEN [label="server_listen"];
+    CLOSING -> END;
+}

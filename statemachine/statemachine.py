@@ -1,8 +1,6 @@
 import json
 import inspect
 
-
-
 class StateMachine:
     def __init__(self, class_state, class_ref: object, state_action_file: str, state_transition_file:str):
         self.class_ref = class_ref
@@ -13,7 +11,6 @@ class StateMachine:
 
         self.__generate_state_action(state_action_file)
         self.__generate_state_transition(state_transition_file)
-
 
     def __generate_state_action(self, filepath):
         """
@@ -32,7 +29,7 @@ class StateMachine:
             print(f"Warning: '{value}' is not a valid method in {self.class_ref.__name__}. Skipping...")
 
         # Remove once done debugging
-        print(self.state_actions)
+        # print(self.state_actions)
 
     def __generate_state_transition(self, filepath):
         """
@@ -52,7 +49,7 @@ class StateMachine:
             print(f"Warning: '{value}' is not a valid method in {self.class_ref.__name__}. Skipping...")
 
         # Remove once done debugging
-        print(self.state_transition)
+        # print(self.state_transition)
 
     def run(self,*args):
         """
@@ -89,30 +86,3 @@ class StateMachine:
                     args = next_args
                 else:
                     isRun = False
-
-
-    # def run(self,*args):
-    #     isRun = True
-    #     while isRun:
-    #         action = self.state_actions[self.current_state]
-
-    #         if action:
-    #             signature = inspect.signature(action)
-    #             param_count = len(signature.parameters)
-
-    #             if param_count == 0:
-    #                 result = action()
-    #             else:
-    #                 result = action(*args)
-
-    #             if isinstance(result, tuple):
-    #                 next_args = result  # Unpack tuple as arguments for next state
-    #             else:
-    #                 next_args = (result,) if result is not None else ()
-
-    #         if self.current_state in self.state_transition:
-    #             next_states = self.state_transition[self.current_state]
-    #             if next_states:
-    #                 self.current_state = next_states[0]
-    #                 args = next_args
-    #             else:

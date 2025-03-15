@@ -44,13 +44,13 @@ class Server:
         flag, uid, seq, message = packet.decode().split('|', 3)
 
         print(f"\t\tSender IP:{client_addr[0]}\n\t\tSender Port:{client_addr[1]}")
-        print("\t\tPacket Data:")
+        print("\t\tPacket Data: ", end="")
 
         if uid in self.uid_seq_dict and seq in self.uid_seq_dict.get(uid):
             self.chart.increment_packet_dropped()
             print(f"seq({seq}) Exist!")
         else:
-            print(f"\t\t\t{client_packet[0].decode()}")
+            print(f"{client_packet[0].decode()}")
         self.chart.increment_packet_received()
         return self.FIRST_INDEX, packet, client_addr
 

@@ -1,0 +1,20 @@
+digraph StateMachine {
+    START -> INIT [label="client_init"];
+    INIT -> INPUT [label="client_message"];
+    INPUT -> PROCESS_SEND [label="client_packet_to_send"];
+    INPUT -> CLOSING [label="client_closing"];
+    PROCESS_SEND -> SEND [label="client_send"];
+    SEND -> RECEIVE [label="client_receive"];
+    RECEIVE -> SEND [label="client_send"];
+    RECEIVE -> INPUT [label="client_message"];
+    RECEIVE -> PROCESS_RECV [label="client_packet_receive"];
+    PROCESS_RECV -> INPUT [label="client_message"];
+    PROCESS_RECV -> SEND [label="client_send"];
+    CLOSING -> END
+
+
+    
+   
+   
+   
+}

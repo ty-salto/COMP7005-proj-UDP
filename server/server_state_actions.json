@@ -3,5 +3,6 @@
     "LISTEN": "server_listen",
     "RECEIVE": "server_receive",
     "PROCESS" : "server_packet_process",
-    "SEND": "server_response"
+    "SEND": "server_response",
+    "CLOSING": "server_close"
 }

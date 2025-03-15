@@ -18,8 +18,9 @@ def options():
     options = {
         "1": "Display options",
         "2": "Display current setup",
-        "3": "Graph",
-        "q": "Quit"
+        "3/q": "Quit",
+        "o": "Hide Prompt",
+        "r": "Reset all parameters",
     }
     table_data = [(key, value) for key, value in options.items()]
     print(tabulate(table_data, headers=["Option", "Description"], tablefmt="pretty"))

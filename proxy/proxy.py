@@ -40,8 +40,7 @@ class Proxy:
             self.client_delay_time = client_delay_time
             self.proxy_socket = socket.socket()
             # self.chart = SocketChart("Proxy")
-            self.display_options = False
-            self.monitor_thread_condition = True
+            self.verbose = False
             self.monitor_thread = threading.Thread(target=self.monitor_user_input, daemon=True)
             self.start_monitoring()
 
@@ -66,19 +65,14 @@ class Proxy:
 
         @return: data and address of client/server
         """
-        print("Waiting for Packets")
+        if self.verbose:
+            print("Waiting for Packets")
         print("CMD (e.g., 'client_drop 0.2', 1) options, 2) current_setup, or 3/q quit): ".rstrip())
         while True:
-            # if not self.monitor_thread_condition:
-            #     self.close()
-            # try:
-                # self.proxy_socket.settimeout(1)
-                packet = self.proxy_socket.recvfrom(1024)
-                ip, port = packet[0], packet[1]
-                return ip, port
-            # except socket.timeout:
-            #     if not self.monitor_thread_condition:
-            #         self.close()
+            packet = self.proxy_socket.recvfrom(1024)
+            ip, port = packet[0], packet[1]
+            return ip, port
+
 
     def proxy_receive(self, data: bytes, addr: tuple) -> tuple:
         """
@@ -95,8 +89,8 @@ class Proxy:
 
 
         message = data.decode()
-        # self.chart.increment_packet_received()
-        print(f"Recieved: {addr}: {message}")
+        if self.verbose:
+            print(f"Recieved: {addr}: {message}")
         return addr, message
 
     def proxy_response(self, address: tuple, message: str) -> None:
@@ -119,14 +113,13 @@ class Proxy:
 
         @param message: message to send to client
         """
-        print("Proxy forwarding to Client", self.client_ip, self.client_port)
+        if self.verbose:
+            print("Proxy forwarding to Client", self.client_ip, self.client_port)
         if self.does_packet_drop(self.server_drop):
             print("Server Packet to Client Fails")
             return
         if self.does_packet_delay(self.server_delay):
-            # print(f"Server Packet is delayed by {self.server_delay_time} seconds")
             self.delay_by_seconds(self.server_delay_time);
-        # self.chart.increment_packet_sent()
         self.proxy_socket.sendto(message, (self.client_ip, self.client_port))
 
     def to_server(self, message: bytes) -> None:
@@ -135,15 +128,13 @@ class Proxy:
 
         @param message: message to send to server
         """
-        print("Proxy forwarding to Server")
+        if self.verbose:
+            print("Proxy forwarding to Server")
         if self.does_packet_drop(self.client_drop):
             print("Client Packet to Server Fails")
             return
         if self.does_packet_delay(self.client_delay):
-            print("Client ")
             self.delay_by_seconds(self.client_delay_time);
-        # print("From Line 137 - Sending Message to Server: ", message, self.target_ip, self.target_port)
-        # self.chart.increment_packet_sent()
         self.proxy_socket.sendto(message,(self.target_ip, self.target_port) )
 
     def does_packet_delay(self, delay_chance: float) -> bool:
@@ -189,14 +180,13 @@ class Proxy:
             return True
         return False
 
-
     def monitor_user_input(self):
             """
             Monitors user input to change proxy parameters dynamically.
             """
             while True:
                 try:
-                    if self.display_options:
+                    if self.verbose:
                         print("CMD (e.g., 'client_drop 0.2', 1, 2, or q): \n")
                     user_input = input().strip().split()
 
@@ -214,8 +204,9 @@ class Proxy:
                                 self.client_delay_time,
                                 self.server_delay_time
                             )
-                        elif command == "o":
-                            self.display_options = not self.display_options
+                        elif command == "v":
+                            self.verbose = not self.verbose
+                            print("Toggling verbose mode")
                         elif command == "r":
                             self.reset_parameters()
                             print("Parameters reset")

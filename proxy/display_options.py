@@ -19,7 +19,7 @@ def options():
         "1": "Display options",
         "2": "Display current setup",
         "3/q": "Quit",
-        "o": "Hide Prompt",
+        "v": "Toggle verbose",
         "r": "Reset all parameters",
     }
     table_data = [(key, value) for key, value in options.items()]

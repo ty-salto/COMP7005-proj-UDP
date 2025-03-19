@@ -81,6 +81,8 @@ class Client:
 
                 if not events:
                     if self.retransmit_count < self.RETRANSMIT_COUNT_LIMIT:
+
+                        #TODO: Dropping means it shoiuld equally retransmit
                         self.chart.increment_packet_dropped()
                         print(f"\t\t-Timeout: Retransmit (count:{self.retransmit_count + 1})")
                         self.retransmit_count += 1
@@ -92,7 +94,8 @@ class Client:
                         packet_to_send = self.message_buffer_dict[self.uid_to_send][0][1]
 
                         self.client_socket.sendto(packet_to_send.encode(), (self.client_ip, self.client_port))
-                        self.chart.increment_packet_sent()
+                        if self.retransmit_count < self.RETRANSMIT_COUNT_LIMIT: 
+                            self.chart.increment_packet_sent()
                         #return self.FIRST_INDEX
                     else:
                         self.message_buffer_dict.pop(self.uid_to_send)
@@ -185,6 +188,7 @@ class Client:
                         print("\t\t-Removing seq...")
                         buffer_packets.pop(i)
 
+                        #TODO: Retransmit is in the wrong place. this is for successful transmission
                         self.chart.append_retransmit_packet(self.retransmit_count, self.RETRANSMIT_COUNT_LIMIT)
                         # reset retranmission count if ack received for the seq.
                         self.retransmit_count = 0

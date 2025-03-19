@@ -62,7 +62,6 @@ class SocketChart:
         """Append the retransmit ratio to the chart data."""
         self.create_timestamp()
         self.packet_retransmitted += amount
-        print("from retrans", amount)
         self.info["packet_retransmitted"].append(amount)
 
     def increment_packet_received(self):

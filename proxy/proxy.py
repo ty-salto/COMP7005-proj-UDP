@@ -1,6 +1,7 @@
 import socket
 import time
 import random
+import queue
 from utils.helper import valid_fixed_or_range_number
 import threading
 import proxy.display_options as display
@@ -43,6 +44,17 @@ class Proxy:
             self.verbose = False
             self.monitor_thread = threading.Thread(target=self.monitor_user_input, daemon=True)
             self.start_monitoring()
+
+            # Queues for handling messages
+            self.client_queue = queue.Queue()
+            self.server_queue = queue.Queue()
+
+            # Threads for processing messages
+            self.client_thread = threading.Thread(target=self.to_server, daemon=True)
+            self.server_thread = threading.Thread(target=self.to_client, daemon=True)
+            self.client_thread.start()
+            self.server_thread.start()
+
 
 
     def proxy_init(self):
@@ -102,39 +114,64 @@ class Proxy:
         ip, port = address
         encoded_message = message.encode()
         if self.is_server(ip, port):
-            self.to_client(encoded_message)
+            #self.to_client(encoded_message)
+            self.server_queue.put(( self.server_delay, self.server_delay_time, encoded_message))
         else:
-            self.to_server(encoded_message)
+            #self.to_server(encoded_message)
+            self.client_queue.put((self.client_delay, self.client_delay_time, encoded_message))
 
-    def to_client(self, message: bytes) -> None:
+    #def to_client(self, message: bytes) -> None:
+    def to_client(self) -> None:
         """
         Sends message to client
 
         @param message: message to send to client
         """
-        if self.verbose:
-            print("Proxy forwarding to Client", self.client_ip, self.client_port)
-        if self.does_packet_drop(self.server_drop):
-            print("Server Packet to Client Fails")
-            return
-        if self.does_packet_delay(self.server_delay):
-            self.delay_by_seconds(self.server_delay_time);
-        self.proxy_socket.sendto(message, (self.client_ip, self.client_port))
+        # if self.verbose:
+        #     print("Proxy forwarding to Client", self.client_ip, self.client_port)
+        # if self.does_packet_drop(self.server_drop):
+        #     print("Server Packet to Client Fails")
+        #     return
+        # if self.does_packet_delay(self.server_delay):
+        #     self.delay_by_seconds(self.server_delay_time)
+        # self.proxy_socket.sendto(message, (self.client_ip, self.client_port))
+        while True:
+            server_delay, server_delay_time, message = self.server_queue.get()
+            if self.verbose:
+                print("Proxy forwarding to Client", self.client_ip, self.client_port)
+            if self.does_packet_drop(self.server_drop):
+                print("Server Packet to Client Fails")
+                continue
+            if self.does_packet_delay(server_delay):
+                self.delay_by_seconds(server_delay_time)
+            self.proxy_socket.sendto(message, (self.client_ip, self.client_port))
 
-    def to_server(self, message: bytes) -> None:
+
+    #def to_server(self, message: bytes) -> None:
+    def to_server(self) -> None:
         """
         Sends message to server
 
         @param message: message to send to server
         """
-        if self.verbose:
-            print("Proxy forwarding to Server")
-        if self.does_packet_drop(self.client_drop):
-            print("Client Packet to Server Fails")
-            return
-        if self.does_packet_delay(self.client_delay):
-            self.delay_by_seconds(self.client_delay_time);
-        self.proxy_socket.sendto(message,(self.target_ip, self.target_port) )
+        # if self.verbose:
+        #     print("Proxy forwarding to Server")
+        # if self.does_packet_drop(self.client_drop):
+        #     print("Client Packet to Server Fails")
+        #     return
+        # if self.does_packet_delay(self.client_delay):
+        #     self.delay_by_seconds(self.client_delay_time)
+        # self.proxy_socket.sendto(message,(self.target_ip, self.target_port) )
+        while True:
+            client_delay, client_delay_time, message = self.client_queue.get()
+            if self.verbose:
+                print("Proxy forwarding to Server")
+            if self.does_packet_drop(self.client_drop):
+                print("Client Packet to Server Fails")
+                continue
+            if self.does_packet_delay(client_delay):
+                self.delay_by_seconds(client_delay_time)
+            self.proxy_socket.sendto(message,(self.target_ip, self.target_port) )
 
     def does_packet_delay(self, delay_chance: float) -> bool:
         """
@@ -143,20 +180,16 @@ class Proxy:
         @param delay_chance: probability of packet being delayed
         @return: True if packet should be delayed, False otherwise
         """
-        if random.random() < delay_chance:
-           return True
-        return False
+        return random.random() < delay_chance
 
-    def does_packet_drop(self, delay_chance: float) -> bool:
+    def does_packet_drop(self, drop_chance: float) -> bool:
         """
         Determines if packet should be dropped
 
         @param delay_chance: probability of packet being dropped
         @return: True if packet should be dropped, False otherwise
         """
-        if random.random() < delay_chance:
-            return True
-        return False
+        return random.random() < drop_chance
 
     def delay_by_seconds(self, delay_time: str) -> None:
         """

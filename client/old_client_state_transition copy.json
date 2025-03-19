@@ -2,6 +2,8 @@
     "INIT": ["INPUT"],
     "INPUT" : ["PROCESS_SEND", "CLOSING"],
     "PROCESS_SEND": ["SEND"],
-    "SEND": ["INPUT"],
+    "SEND": ["RECEIVE"],
+    "RECEIVE": ["SEND","INPUT", "PROCESS_RECV"],
+    "PROCESS_RECV": ["INPUT", "SEND"],
     "CLOSING" : []
 }

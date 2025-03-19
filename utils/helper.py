@@ -4,10 +4,9 @@ def is_valid_address_port(addrport, is_port):
         raise ValueError("Missing Arguments: usage -ip <ip> -port <port>")
         return False
     if is_port:
-        if addrport < 1 or addrport > 65535:
+        if is_port < 1 or is_port > 65535:
             raise ValueError("Invalid Port Number: Must be a number within range 1-65535")
             return False
-        return True
     sections = addrport.split('.')
     if len(sections) != 4:
         raise ValueError("Invalid Address: Must be in the following format xxx.xxx.xxx.xxx")

@@ -1,4 +1,5 @@
 from utils.args_parser import ArgsParser
+from utils import helper
 from server.server import Server
 from server.server_states import ServerState
 from statemachine.statemachine import StateMachine
@@ -7,6 +8,8 @@ from statemachine.statemachine import StateMachine
 if __name__ == '__main__':
     parse_args = ArgsParser("Server", "./server/server.json")
     args = parse_args.get_args()
+
+    helper.is_valid_address_port(args.listen_ip, args.listen_port)
 
     server = Server(args.listen_ip, args.listen_port)
 

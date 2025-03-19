@@ -15,13 +15,13 @@
     "arg": "--target-ip",
     "help": "Target IP Address",
     "type": "str",
-    "required": "false"
+    "required": "true"
   },
   "target_port": {
     "arg": "--target-port",
     "help": "Target Port Number",
     "type": "int",
-    "required": "false"
+    "required": "true"
   },
   "client_drop": {
     "arg": "--client-drop",

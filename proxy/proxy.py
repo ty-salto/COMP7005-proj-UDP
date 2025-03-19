@@ -1,7 +1,6 @@
 import socket
 import time
 import random
-from chart.socket_chart import SocketChart
 from utils.helper import valid_fixed_or_range_number
 import threading
 import proxy.display_options as display
@@ -40,9 +39,8 @@ class Proxy:
             self.server_delay_time = server_delay_time
             self.client_delay_time = client_delay_time
             self.proxy_socket = socket.socket()
-            self.chart = SocketChart("Proxy")
-            self.display_options = False
-            self.monitor_thread_condition = True
+            # self.chart = SocketChart("Proxy")
+            self.verbose = False
             self.monitor_thread = threading.Thread(target=self.monitor_user_input, daemon=True)
             self.start_monitoring()
 
@@ -67,19 +65,13 @@ class Proxy:
 
         @return: data and address of client/server
         """
-        print("Waiting for Packets")
-        print("CMD (e.g., 'client_drop 0.2', 1) options, 2) current_setup, or 3/q quit): ".rstrip())
+        if self.verbose:
+            print("Waiting for Packets")
         while True:
-            if not self.monitor_thread_condition:
-                self.close()
-            try:
-                self.proxy_socket.settimeout(1)
-                packet = self.proxy_socket.recvfrom(1024)
-                ip, port = packet[0], packet[1]
-                return ip, port
-            except socket.timeout:
-                if not self.monitor_thread_condition:
-                    self.close()
+            packet = self.proxy_socket.recvfrom(1024)
+            ip, port = packet[0], packet[1]
+            return ip, port
+
 
     def proxy_receive(self, data: bytes, addr: tuple) -> tuple:
         """
@@ -96,8 +88,8 @@ class Proxy:
 
 
         message = data.decode()
-        self.chart.increment_packet_received()
-        print(f"Recieved: {addr}: {message}")
+        if self.verbose:
+            print(f"Recieved: {addr}: {message}")
         return addr, message
 
     def proxy_response(self, address: tuple, message: str) -> None:
@@ -120,14 +112,13 @@ class Proxy:
 
         @param message: message to send to client
         """
-        print("Proxy forwarding to Client", self.client_ip, self.client_port)
+        if self.verbose:
+            print("Proxy forwarding to Client", self.client_ip, self.client_port)
         if self.does_packet_drop(self.server_drop):
             print("Server Packet to Client Fails")
             return
         if self.does_packet_delay(self.server_delay):
-            # print(f"Server Packet is delayed by {self.server_delay_time} seconds")
             self.delay_by_seconds(self.server_delay_time);
-        self.chart.increment_packet_sent()
         self.proxy_socket.sendto(message, (self.client_ip, self.client_port))
 
     def to_server(self, message: bytes) -> None:
@@ -136,15 +127,13 @@ class Proxy:
 
         @param message: message to send to server
         """
-        print("Proxy forwarding to Server")
+        if self.verbose:
+            print("Proxy forwarding to Server")
         if self.does_packet_drop(self.client_drop):
             print("Client Packet to Server Fails")
             return
         if self.does_packet_delay(self.client_delay):
-            print("Client ")
             self.delay_by_seconds(self.client_delay_time);
-        # print("From Line 137 - Sending Message to Server: ", message, self.target_ip, self.target_port)
-        self.chart.increment_packet_sent()
         self.proxy_socket.sendto(message,(self.target_ip, self.target_port) )
 
     def does_packet_delay(self, delay_chance: float) -> bool:
@@ -194,9 +183,9 @@ class Proxy:
             """
             Monitors user input to change proxy parameters dynamically.
             """
-            while self.monitor_thread_condition:
+            while True:
                 try:
-                    if self.display_options:
+                    if self.verbose:
                         print("CMD (e.g., 'client_drop 0.2', 1, 2, or q): \n")
                     user_input = input().strip().split()
 
@@ -214,29 +203,34 @@ class Proxy:
                                 self.client_delay_time,
                                 self.server_delay_time
                             )
-                        elif command == "3":
-                            self.monitor_thread_condition = False
-                        elif command == "o":
-                            self.display_options = not self.display_options
-                        elif command == "reset":
+                        elif command == "v":
+                            self.verbose = not self.verbose
+                            print("Toggling verbose mode")
+                        elif command == "r":
                             self.reset_parameters()
                             print("Parameters reset")
-                        elif  command == "q":
-                            self.proxy_socket.close()
+                        elif  command == "q" or command == "3":
+                            self.close()
                             exit()
                     elif len(user_input) == 2:
                         param, value = user_input
                         self.update_parameter(param, value)
-                    elif len(user_input) == 5:
-                        c_drop, s_drop, c_delay, s_delay, delay_time = user_input
-                        self.client_drop = int(c_drop) / Proxy.HUNDRED
-                        self.server_drop = int(s_drop) / Proxy.HUNDRED
-                        self.client_delay = int(c_delay) / Proxy.HUNDRED
-                        self.server_delay = int(s_delay) / Proxy.HUNDRED
-                        self.client_delay_time = delay_time
-                        self.server_delay_time = delay_time
+                    elif len(user_input) == 6:
+                        c_drop, s_drop, c_delay, s_delay, c_delay_time, s_delay_time = user_input
+                        self.change_all_parameters(int(c_drop), int(s_drop), int(c_delay), int(s_delay), c_delay_time, s_delay_time)
+                        display.current_setup(
+                            self.client_drop,
+                            self.server_drop,
+                            self.client_delay,
+                            self.server_delay,
+                            self.client_delay_time,
+                            self.server_delay_time
+                        )
                     else:
                         print("Invalid command. Please enter a valid command.")
+                except KeyboardInterrupt:
+                    self.close()
+                    exit()
                 except ValueError:
                     print("Invalid value. Please enter a valid number.")
                 except Exception as e:
@@ -246,9 +240,17 @@ class Proxy:
         """
         Closes the proxy server and joins the monitor thread.
         """
-        print("Generating Chart")
+        print("Closing Detected")
         self.proxy_socket.close()
         exit()
+
+    def change_all_parameters(self, c_drop: int, s_drop: int, c_delay: int, s_delay: int, c_delay_time: str, s_delay_time: str):
+        self.client_drop = c_drop / Proxy.HUNDRED
+        self.server_drop = s_drop / Proxy.HUNDRED
+        self.client_delay = c_delay / Proxy.HUNDRED
+        self.server_delay = s_delay / Proxy.HUNDRED
+        self.client_delay_time = c_delay_time
+        self.server_delay_time = s_delay_time
 
     def reset_parameters(self):
         self.client_drop = 0
@@ -257,7 +259,14 @@ class Proxy:
         self.server_delay = 0
         self.client_delay_time = ""
         self.server_delay_time = ""
-
+        display.current_setup(
+            self.client_drop,
+            self.server_drop,
+            self.client_delay,
+            self.server_delay,
+            self.client_delay_time,
+            self.server_delay_time
+        )
 
     def update_parameter(self, param: str, value: str) -> None:
         """

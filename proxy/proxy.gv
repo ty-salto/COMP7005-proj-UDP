@@ -1,7 +1,22 @@
+// https://dreampuf.github.io/GraphvizOnline/
+digraph proxy_statemachine {
+    fontname="Helvetica,Arial,sans-serif"
+    node [fontname="Helvetica,Arial,sans-serif"]
+    edge [fontname="Helvetica,Arial,sans-serif"]
+    rankdir=TB;
+    size="7.5,7.5";
+    ratio="fill";
+    node [shape = doublecircle]; START, EXIT;
+    node [shape = box];
+    START -> INIT [label="proxy_init"];
+    INIT -> LISTEN [label="proxy_listen"];
+    LISTEN -> RECEIVE [label="proxy_receive"];
+    LISTEN -> CLOSING [label="close"];
+    RECEIVE -> SEND [label="proxy_response"];
+    SEND -> LISTEN [label="proxy_listen"];
+    CLOSING -> EXIT;
 
-digraph StateMachine {
-    INIT -> LISTEN;
-    LISTEN -> RECEIVE;
-    RECEIVE -> SEND;
-    SEND -> LISTEN;
+    // Attempt to influence START placement
+    edge [style=invis]; // Make an edge invisible
+    START -> EXIT; 
 }

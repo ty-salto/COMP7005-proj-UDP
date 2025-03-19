@@ -1,6 +1,7 @@
 {
     "INIT": ["LISTEN"],
-    "LISTEN": ["RECEIVE"],
+    "LISTEN": ["RECEIVE", "CLOSING"],
     "RECEIVE": ["SEND"],
-    "SEND": ["LISTEN"]
+    "SEND": ["LISTEN"],
+    "CLOSING" : []
 }

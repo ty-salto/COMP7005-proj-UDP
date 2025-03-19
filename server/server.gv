@@ -1,10 +1,23 @@
-digraph StateMachine {
+// https://dreampuf.github.io/GraphvizOnline/
+digraph server_statemachine {
+    fontname="Helvetica,Arial,sans-serif"
+    node [fontname="Helvetica,Arial,sans-serif"]
+    edge [fontname="Helvetica,Arial,sans-serif"]
+    rankdir=TB;
+    size="7.5,7.5";
+    ratio="fill";
+    node [shape = doublecircle]; START, EXIT;
+    node [shape = box];
     START -> INIT [label="server_init"];
     INIT -> LISTEN [label="server_listen"];
     LISTEN -> RECEIVE [label="server_receive"];
-    LISTEN -> CLOSING [label=server_close"];
-    RECEIVE -> PROCESS [label=server_packet_process"];
-    PROCESS -> SEND [label=server_response"];
+    LISTEN -> CLOSING [label="server_close"];
+    RECEIVE -> PROCESS [label="server_packet_process"];
+    PROCESS -> SEND [label="server_response"];
     SEND -> LISTEN [label="server_listen"];
-    CLOSING -> END;
+    CLOSING -> EXIT;
+
+    // Attempt to influence START placement
+    edge [style=invis]; // Make an edge invisible
+    START -> CLOSING;
 }

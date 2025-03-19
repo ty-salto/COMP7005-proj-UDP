@@ -1,5 +1,6 @@
 from statemachine.statemachine import StateMachine
 from utils.args_parser import ArgsParser
+from utils import helper
 from proxy.proxy import Proxy
 from proxy.proxy_states import ProxyState
 
@@ -16,6 +17,11 @@ if __name__ == "__main__":
 
     parse_args = ArgsParser("Proxy", "./proxy/proxy.json")
     args = parse_args.get_args()
+
+
+    helper.is_valid_address_port(args.listen_ip, args.listen_port)
+    helper.is_valid_address_port(args.target_ip, args.target_port)
+
     if args.preset == "default":
         proxy = Proxy(proxy_ip=args.listen_ip, proxy_port=args.listen_port, target_ip=args.target_ip, target_port=args.target_port, client_drop=0.0, server_drop=0.0, client_delay=0.0, server_delay=0.0, server_delay_time="0", client_delay_time="0")
     else:

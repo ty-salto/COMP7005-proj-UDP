@@ -1,4 +1,13 @@
-digraph StateMachine {
+// https://dreampuf.github.io/GraphvizOnline/
+digraph client_statemachine {
+    fontname="Helvetica,Arial,sans-serif"
+    node [fontname="Helvetica,Arial,sans-serif"]
+    edge [fontname="Helvetica,Arial,sans-serif"]
+    rankdir=TB;
+    size="7.5,7.5";
+    ratio="fill";
+    node [shape = doublecircle]; START, EXIT;
+    node [shape = box];
     START -> INIT [label="client_init"];
     INIT -> INPUT [label="client_message"];
     INPUT -> PROCESS_SEND [label="client_packet_to_send"];
@@ -10,11 +19,12 @@ digraph StateMachine {
     RECEIVE -> PROCESS_RECV [label="client_packet_receive"];
     PROCESS_RECV -> INPUT [label="client_message"];
     PROCESS_RECV -> SEND [label="client_send"];
-    CLOSING -> END
+    CLOSING -> EXIT;
 
-
-    
-   
-   
-   
+    // Attempt to influence START placement
+    edge [style=invis]; // Make an edge invisible
+    START -> PROCESS_RECV;
+    EXIT -> PROCESS_RECV;
 }
+
+

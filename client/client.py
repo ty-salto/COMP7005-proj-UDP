@@ -82,7 +82,6 @@ class Client:
                 if not events:
                     if self.retransmit_count < self.RETRANSMIT_COUNT_LIMIT:
 
-                        #TODO: Dropping means it shoiuld equally retransmit
                         self.chart.increment_packet_dropped()
                         print(f"\t\t-Timeout: Retransmit (count:{self.retransmit_count + 1})")
                         self.retransmit_count += 1
@@ -93,6 +92,8 @@ class Client:
 
                         packet_to_send = self.message_buffer_dict[self.uid_to_send][0][1]
 
+
+                        #TODO: Dropping means it shoiuld equally retransmit This should be the spot to count the retransmit
                         self.client_socket.sendto(packet_to_send.encode(), (self.client_ip, self.client_port))
                         if self.retransmit_count < self.RETRANSMIT_COUNT_LIMIT: 
                             self.chart.increment_packet_sent()

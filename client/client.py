@@ -28,7 +28,7 @@ class Client:
         self.receive_thread = threading.Thread(target=self.client_receive, daemon=True)
         self.receive_thread.start()
 
-        self.message_removed_event = threading.Event() 
+        self.message_removed_event = threading.Event()
 
 
     def client_init(self):
@@ -95,11 +95,12 @@ class Client:
 
                         #TODO: Dropping means it shoiuld equally retransmit This should be the spot to count the retransmit
                         self.client_socket.sendto(packet_to_send.encode(), (self.client_ip, self.client_port))
-                        if self.retransmit_count < self.RETRANSMIT_COUNT_LIMIT: 
+                        if self.retransmit_count < self.RETRANSMIT_COUNT_LIMIT:
                             self.chart.increment_packet_sent()
                         #return self.FIRST_INDEX
                     else:
                         self.message_buffer_dict.pop(self.uid_to_send)
+                        self.chart.append_retransmit_packet(self.retransmit_count, self.RETRANSMIT_COUNT_LIMIT)
                         self.retransmit_count = 0
                         self.message_removed_event.set()
                         #return self.SECOND_INDEX
@@ -108,8 +109,8 @@ class Client:
                     self.client_packet_receive(recv_packet)
 
 
-            #return self.THIRD_INDEX, recv_packet        
-        
+            #return self.THIRD_INDEX, recv_packet
+
 
 
     def client_closing(self):
@@ -205,4 +206,3 @@ class Client:
 
 
         # return self.FIRST_INDEX
-            

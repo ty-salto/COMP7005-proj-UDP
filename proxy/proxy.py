@@ -245,6 +245,8 @@ class Proxy:
                         elif  command == "q" or command == "3":
                             self.close()
                             exit()
+                        else:
+                            print("Invalid command. Please enter a valid command.")
                     elif len(user_input) == 2:
                         param, value = user_input
                         self.update_parameter(param, value)

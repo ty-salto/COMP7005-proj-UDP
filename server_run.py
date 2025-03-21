@@ -10,7 +10,7 @@ if __name__ == '__main__':
     args = parse_args.get_args()
 
     try:
-        helper.is_valid_address_port(args.target_ip, args.target_port)
+        helper.is_valid_address_port(args.listen_ip, args.listen_port)
         server = Server(args.listen_ip, args.listen_port)
         
 
